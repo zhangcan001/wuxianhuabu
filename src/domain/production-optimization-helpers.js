@@ -13,6 +13,75 @@ export function buildGenerationTaskFingerprint(job = {}) {
   return `gen-${stableHash(source)}`;
 }
 
+export const FRONTEND_OPTIMIZATION_CHECKLIST = [
+  { key: "main-composition", title: "继续拆 src/main.jsx", owner: "src/app hooks/actions" },
+  { key: "queue-result-coordinator", title: "收敛媒体队列结果回写", owner: "project command layer" },
+  { key: "bundle-release-gate", title: "发布检查纳入 bundle 回归门槛", owner: "scripts" },
+  { key: "preview-smoke", title: "固定预览端口并自动跑 Playwright 冒烟", owner: "scripts" },
+  { key: "legacy-canvas-isolation", title: "继续剥离兼容画布依赖", owner: "src/app legacy canvas" },
+  { key: "media-field-boundary", title: "梳理媒体字段命名边界", owner: "src/domain media refs" },
+  { key: "production-e2e-fixture", title: "补生产链路端到端 fixture", owner: "src/domain mini e2e" },
+  { key: "css-budget", title: "优化首屏 CSS 体积", owner: "styles/bundle budget" },
+  { key: "panel-style-scope", title: "拆分产品面板样式边界", owner: "product studio styles" },
+  { key: "provider-preflight", title: "前移 provider 配置校验", owner: "production preflight" },
+  { key: "local-path-preview-tests", title: "加强本地路径与预览 URL 边界测试", owner: "media selectors" },
+  { key: "migration-board", title: "建立迁移任务看板", owner: "docs/tests" },
+];
+
+export function buildOptimizationMigrationBoard(completedKeys = [], options = {}) {
+  const completed = new Set(Array.isArray(completedKeys) ? completedKeys : []);
+  const items = FRONTEND_OPTIMIZATION_CHECKLIST.map((item, index) => ({
+    ...item,
+    index: index + 1,
+    status: completed.has(item.key) ? "done" : "pending",
+  }));
+  const done = items.filter((item) => item.status === "done").length;
+  return {
+    ok: done === items.length,
+    total: items.length,
+    done,
+    pending: items.length - done,
+    next: items.find((item) => item.status !== "done")?.key || "",
+    generatedAt: options.generatedAt || "",
+    items,
+  };
+}
+
+export function auditMediaReferenceBoundaries(project = {}) {
+  const issues = [];
+  const episode = project.activeEpisode || project.episodes?.find((item) => item.id === project.activeEpisodeId) || project.episodes?.[0] || {};
+  (episode.assets || []).forEach((asset, index) => {
+    auditDisplayAndPath(issues, `assets[${asset.id || asset.token || index}]`, "image", asset.imageUrl, asset.imagePath);
+    (asset.imageItems || []).forEach((item, itemIndex) => {
+      auditDisplayAndPath(issues, `assets[${asset.id || asset.token || index}].imageItems[${itemIndex}]`, "image", item.imageUrl || item.url, item.imagePath || item.path);
+    });
+  });
+  (episode.shots || []).forEach((shot, index) => {
+    const label = `shots[${shot.id || index}]`;
+    auditDisplayAndPath(issues, label, "image", shot.imageUrl || shot.imageResultUrl, shot.imagePath);
+    auditDisplayAndPath(issues, label, "video", shot.videoUrl || shot.videoResultUrl, shot.videoPath);
+    (shot.imageItems || []).forEach((item, itemIndex) => {
+      auditDisplayAndPath(issues, `${label}.imageItems[${itemIndex}]`, "image", item.imageUrl || item.url, item.imagePath || item.path);
+    });
+    (shot.videoItems || []).forEach((item, itemIndex) => {
+      auditDisplayAndPath(issues, `${label}.videoItems[${itemIndex}]`, "video", item.videoUrl || item.url, item.videoPath || item.path);
+    });
+  });
+  (episode.timeline?.clips || []).forEach((clip, index) => {
+    auditDisplayAndPath(issues, `timeline.clips[${clip.id || index}]`, "media", clip.mediaUrl || clip.videoUrl || clip.imageUrl, clip.mediaPath || clip.videoPath || clip.imagePath);
+  });
+  return {
+    ok: issues.length === 0,
+    issues,
+    totals: {
+      issues: issues.length,
+      assets: (episode.assets || []).length,
+      shots: (episode.shots || []).length,
+      clips: (episode.timeline?.clips || []).length,
+    },
+  };
+}
+
 export function recoverInterruptedQueue(queue = [], options = {}) {
   const now = options.now ? options.now() : Date.now();
   let recovered = 0;
@@ -138,6 +207,22 @@ function collectLocalMediaPaths(episode = {}) {
   (episode.assets || []).forEach((asset) => values.push(asset.imagePath));
   (episode.timeline?.clips || []).forEach((clip) => values.push(clip.mediaPath, clip.videoPath));
   return values.filter((value) => /^[a-zA-Z]:[\\/]/.test(String(value || "")) || /^\\\\/.test(String(value || "")));
+}
+
+function auditDisplayAndPath(issues, target, kind, displayUrl = "", localPath = "") {
+  const url = String(displayUrl || "").trim();
+  const path = String(localPath || "").trim();
+  if (url && isLocalPath(url)) {
+    issues.push({ target, kind, field: "url", reason: "display url contains a local file path" });
+  }
+  if (path && !isLocalPath(path)) {
+    issues.push({ target, kind, field: "path", reason: "local path field contains a display url" });
+  }
+}
+
+function isLocalPath(value = "") {
+  const text = String(value || "");
+  return /^[a-zA-Z]:[\\/]/.test(text) || /^\\\\/.test(text) || text.startsWith("/");
 }
 
 function findDuplicates(values = []) {

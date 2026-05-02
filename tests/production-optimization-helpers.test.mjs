@@ -13,7 +13,10 @@ import {
   buildBatchGenerationPreview,
   buildDeliveryPreflightChecklist,
   buildGenerationTaskFingerprint,
+  buildOptimizationMigrationBoard,
   buildSyncStatusReport,
+  auditMediaReferenceBoundaries,
+  FRONTEND_OPTIMIZATION_CHECKLIST,
   recoverInterruptedQueue,
 } from "../src/domain/production-optimization-helpers.js";
 
@@ -149,4 +152,32 @@ test("delivery preflight checklist reports blockers before export", () => {
   assert.equal(checklist.blockers.some((item) => item.includes("缺视频素材")), true);
   assert.equal(checklist.warnings.some((item) => item.includes("未通过审片")), true);
   assert.equal(checklist.totals.localPaths, 1);
+});
+
+test("optimization migration board tracks the 12 requested items", () => {
+  const board = buildOptimizationMigrationBoard(FRONTEND_OPTIMIZATION_CHECKLIST.map((item) => item.key), {
+    generatedAt: "2026-05-02",
+  });
+
+  assert.equal(FRONTEND_OPTIMIZATION_CHECKLIST.length, 12);
+  assert.equal(board.ok, true);
+  assert.equal(board.done, 12);
+  assert.equal(board.pending, 0);
+  assert.equal(board.next, "");
+  assert.equal(board.items[0].index, 1);
+});
+
+test("media reference boundary audit catches local paths in display urls", () => {
+  const report = auditMediaReferenceBoundaries({
+    activeEpisode: {
+      assets: [{ id: "a1", imageUrl: "C:/cache/a.png", imagePath: "asset://a.png" }],
+      shots: [{ id: "S01", imageUrl: "asset://s01.png", imagePath: "C:/cache/s01.png" }],
+      timeline: { clips: [{ id: "c1", mediaUrl: "asset://s01.mp4", mediaPath: "C:/cache/s01.mp4" }] },
+    },
+  });
+
+  assert.equal(report.ok, false);
+  assert.equal(report.issues.length, 2);
+  assert.equal(report.issues[0].field, "url");
+  assert.equal(report.issues[1].field, "path");
 });

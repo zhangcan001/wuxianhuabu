@@ -12,6 +12,8 @@
     "bundle:check": "node scripts/bundle-budget-check.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:e2e:studio": "node scripts/studio-smoke.mjs",
+    "test:e2e:studio:preview": "node scripts/run-studio-smoke-preview.mjs",
+    "test:release": "npm run build && npm run bundle:check && npm run test:release-safety",
     "test:release-safety": "node scripts/release-safety-check.mjs",
     "test:tauri-build": "node scripts/tauri-build-check.mjs",
     "test:tauri-build:run": "node scripts/tauri-build-check.mjs --run",

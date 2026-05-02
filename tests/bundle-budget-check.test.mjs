@@ -29,3 +29,20 @@ test("checkBundleBudgets passes when matching bundles stay within limits", () =>
   assert.equal(result.ok, true);
   assert.deepEqual(result.violations, []);
 });
+
+test("checkBundleBudgets reports missing required split bundles", () => {
+  const result = checkBundleBudgets([
+    { file: "dist/assets/index-abc.js", kb: 680 },
+  ], [
+    { pattern: /^dist\/assets\/index-.*\.js$/, maxKb: 700, required: true },
+    { pattern: /^dist\/assets\/legacy-canvas-shell-.*\.js$/, maxKb: 25, required: true },
+  ]);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.violations, [{
+    file: String(/^dist\/assets\/legacy-canvas-shell-.*\.js$/),
+    kb: 0,
+    maxKb: 25,
+    missing: true,
+  }]);
+});

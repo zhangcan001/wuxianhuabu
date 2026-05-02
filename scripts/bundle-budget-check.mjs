@@ -1,15 +1,27 @@
 import { collectBundleAssets } from "./bundle-size-report.mjs";
 
 export const DEFAULT_BUNDLE_BUDGETS = [
-  { pattern: /^dist\/assets\/index-.*\.js$/, maxKb: 720 },
+  { pattern: /^dist\/assets\/index-.*\.js$/, maxKb: 700, required: true },
   { pattern: /^dist\/assets\/three-.*\.js$/, maxKb: 780 },
-  { pattern: /^dist\/assets\/index-.*\.css$/, maxKb: 160 },
+  { pattern: /^dist\/assets\/index-.*\.css$/, maxKb: 150, required: true },
+  { pattern: /^dist\/assets\/legacy-canvas-shell-.*\.js$/, maxKb: 25, required: true },
+  { pattern: /^dist\/assets\/project-studio-.*\.js$/, maxKb: 110, required: true },
+  { pattern: /^dist\/assets\/workspace-panels-.*\.js$/, maxKb: 120, required: true },
 ];
 
 export function checkBundleBudgets(files = collectBundleAssets(), budgets = DEFAULT_BUNDLE_BUDGETS) {
   const violations = [];
   for (const budget of budgets) {
     const matches = files.filter((file) => budget.pattern.test(file.file));
+    if (budget.required && matches.length === 0) {
+      violations.push({
+        file: String(budget.pattern),
+        kb: 0,
+        maxKb: budget.maxKb,
+        missing: true,
+      });
+      continue;
+    }
     for (const file of matches) {
       if (file.kb > budget.maxKb) {
         violations.push({
@@ -30,6 +42,10 @@ export function printBundleBudgetResult(result = checkBundleBudgets()) {
   }
   console.error("Bundle budgets failed:");
   for (const item of result.violations) {
+    if (item.missing) {
+      console.error(`${item.file}: required bundle was not emitted`);
+      continue;
+    }
     console.error(`${item.file}: ${item.kb.toFixed(2)} kB > ${item.maxKb.toFixed(2)} kB`);
   }
 }

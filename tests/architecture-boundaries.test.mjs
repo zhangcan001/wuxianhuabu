@@ -389,6 +389,27 @@ test("new app orchestration modules own extracted main responsibilities", () => 
   expected.forEach((file) => assert.equal(appFiles.has(file), true, `${file} should exist`));
 });
 
+test("release and migration guardrails stay wired", () => {
+  const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  const releaseSafety = readFileSync(join(root, "scripts", "release-safety-check.mjs"), "utf8");
+  const bundleBudget = readFileSync(join(root, "scripts", "bundle-budget-check.mjs"), "utf8");
+  const smokePreview = readFileSync(join(root, "scripts", "run-studio-smoke-preview.mjs"), "utf8");
+  const optimizationHelpers = readFileSync(join(root, "src", "domain", "production-optimization-helpers.js"), "utf8");
+  const docs = readFileSync(join(root, "docs", "optimization-checklist.md"), "utf8");
+
+  assert.match(packageJson.scripts["test:e2e:studio:preview"], /run-studio-smoke-preview\.mjs/);
+  assert.match(packageJson.scripts["test:release"], /bundle:check/);
+  assert.match(packageJson.scripts["test:release"], /test:release-safety/);
+  assert.match(releaseSafety, /test:e2e:studio:preview/);
+  assert.match(bundleBudget, /legacy-canvas-shell/);
+  assert.match(bundleBudget, /project-studio/);
+  assert.match(bundleBudget, /workspace-panels/);
+  assert.match(smokePreview, /--strictPort/);
+  assert.match(optimizationHelpers, /FRONTEND_OPTIMIZATION_CHECKLIST/);
+  assert.match(optimizationHelpers, /auditMediaReferenceBoundaries/);
+  assert.match(docs, /12 项优化/);
+});
+
 function listSourceFiles(dir) {
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name);
