@@ -532,6 +532,7 @@ import {
 } from "./app/full-chain-check-action.js";
 import {
   queueEpisodeMediaAction,
+  queueTargetMediaAction,
 } from "./app/production-media-queue-actions.js";
 import {
   buildProjectStudioProps,
@@ -5633,198 +5634,178 @@ async function runGenerationQueue() {
 
   async function queueActiveAssetImage(asset = {}, options = {}) {
     const targetId = String(asset.id || asset.token || asset.name || "").trim();
-    if (!targetId) {
-      const result = {
+    const providerMode = normalizeImageProviderMode(options.providerMode || currentProviderMode(settings));
+    return queueTargetMediaAction({
+      mediaKind: "image",
+      targetId,
+      targetLabel: "资产图",
+      targetMissingResult: {
         title: "资产缺少标识",
         summary: "当前资产缺少 id、token 或名称，无法定位生成任务。",
-      };
-      setProjectMessage(result.summary);
-      return result;
-    }
-    const providerMode = normalizeImageProviderMode(options.providerMode || currentProviderMode(settings));
-    const preflight = checkImageTaskPreflight(commercialProject, { asset });
-    if (!preflight.ok) {
-      notifyTaskBlocked(preflight.message);
-      return { title: "资产图未入队", summary: preflight.message };
-    }
-    if (!(await ensureProviderReady("image", providerMode))) {
-      return { title: "资产图未入队", summary: "图片供应商连接或配置未通过体检。" };
-    }
-    const productionPlan = planImageQueueJobsFromProductionService({
-      productionAppService,
-      commercialProject,
+      },
       providerMode,
-      events: productionEvents,
+      options,
+      checkPreflight: () => checkImageTaskPreflight(commercialProject, { asset }),
+      notifyTaskBlocked,
+      ensureProviderReady,
+      setProjectMessage,
+      planProductionJobs: () => planImageQueueJobsFromProductionService({
+        productionAppService,
+        commercialProject,
+        providerMode,
+        events: productionEvents,
+      }),
+      findPlannedJobs: (jobs) => jobs.filter((job) => (
+        job.type === "asset.image"
+        && [job.targetId, job.sourceAssetToken, job.sourceAssetName, job.title]
+          .some((value) => String(value || "").includes(targetId))
+      )),
+      buildFallbackJobs: () => {
+        const prompt = String(asset.canonicalPrompt || asset.prompt || asset.visualLock || asset.description || asset.name || asset.token || "").trim();
+        if (!prompt) return [];
+        return [{
+          type: "asset.image",
+          kind: "image",
+          episodeId: commercialProject?.activeEpisode?.id || commercialProject?.activeEpisodeId || "",
+          targetType: "asset",
+          targetId,
+          sourceAssetToken: asset.token || "",
+          sourceAssetName: asset.name || "",
+          assetCategory: asset.typeLabel || asset.category || asset.type || "资产",
+          title: `${asset.name || asset.token || targetId}-定妆图`,
+          prompt,
+          providerMode,
+          imageProviderMode: providerMode,
+          priority: "高",
+          queueStage: "asset-image",
+        }];
+      },
+      emptyResult: () => ({
+        title: "资产图未入队",
+        summary: `没有找到 ${asset.name || asset.token || "该资产"} 的可执行资产图任务，请检查资产提示词或图片供应商模式。`,
+      }),
+      productionCommandContext,
+      commitPlannedQueueJobs,
+      setShowQueue,
+      successTitle: "资产图任务已入队",
+      successMessage: `已加入 ${asset.name || asset.token || targetId} 的资产图任务。`,
+      metricLabel: "资产图",
     });
-    const jobs = (productionPlan.jobs || []).filter((job) => (
-      job.type === "asset.image"
-      && [job.targetId, job.sourceAssetToken, job.sourceAssetName, job.title]
-        .some((value) => String(value || "").includes(targetId))
-    ));
-    const prompt = String(asset.canonicalPrompt || asset.prompt || asset.visualLock || asset.description || asset.name || asset.token || "").trim();
-    const fallbackJobs = jobs.length || !prompt ? jobs : [{
-      type: "asset.image",
-      kind: "image",
-      episodeId: commercialProject?.activeEpisode?.id || commercialProject?.activeEpisodeId || "",
-      targetType: "asset",
-      targetId,
-      sourceAssetToken: asset.token || "",
-      sourceAssetName: asset.name || "",
-      assetCategory: asset.typeLabel || asset.category || asset.type || "资产",
-      title: `${asset.name || asset.token || targetId}-定妆图`,
-      prompt,
-      providerMode,
-      imageProviderMode: providerMode,
-      priority: "高",
-      queueStage: "asset-image",
-    }];
-    if (!fallbackJobs.length) {
-      const summary = `没有找到 ${asset.name || asset.token || "该资产"} 的可执行资产图任务，请检查资产提示词或图片供应商模式。`;
-      setProjectMessage(summary);
-      return { title: "资产图未入队", summary };
-    }
-    commitPlannedQueueJobs(productionCommandContext, { ...productionPlan, jobs: fallbackJobs }, {
-      autoRun: options.autoRun !== false,
-      message: `已加入 ${asset.name || asset.token || targetId} 的资产图任务。`,
-    });
-    setShowQueue(true);
-    const summary = `已加入 ${asset.name || asset.token || targetId} 的资产图任务。`;
-    return {
-      title: "资产图任务已入队",
-      summary,
-      metrics: [{ label: "资产图", value: fallbackJobs.length }],
-    };
   }
 
   async function queueActiveShotImage(shot = {}, options = {}) {
     const shotId = String(shot.id || "").trim();
-    if (!shotId) {
-      const summary = "当前镜头缺少编号，无法加入图片生成任务。";
-      setProjectMessage(summary);
-      return { title: "镜头图片未入队", summary };
-    }
     const providerMode = normalizeImageProviderMode(options.providerMode || currentProviderMode(settings));
-    const preflight = checkImageTaskPreflight(commercialProject, { shot });
-    if (!preflight.ok) {
-      notifyTaskBlocked(preflight.message);
-      return { title: "镜头图片未入队", summary: preflight.message };
-    }
-    if (!(await ensureProviderReady("image", providerMode))) {
-      return { title: "图片任务未入队", summary: "图片供应商连接或配置未通过体检。" };
-    }
-    if (providerMode === "upload") {
-      const summary = `${shotId} 已切换为本地上传，请选择图片文件。`;
-      setProjectMessage(summary);
-      return { title: "等待上传", summary };
-    }
-    const productionPlan = planImageQueueJobsFromProductionService({
-      productionAppService,
-      commercialProject,
+    return queueTargetMediaAction({
+      mediaKind: "image",
+      targetId: shotId,
+      targetLabel: "镜头图片",
+      targetMissingResult: { title: "镜头图片未入队", summary: "当前镜头缺少编号，无法加入图片生成任务。" },
       providerMode,
-      events: productionEvents,
+      options,
+      checkPreflight: () => checkImageTaskPreflight(commercialProject, { shot }),
+      notifyTaskBlocked,
+      ensureProviderReady,
+      uploadSummary: providerMode === "upload" ? `${shotId} 已切换为本地上传，请选择图片文件。` : "",
+      setProjectMessage,
+      planProductionJobs: () => planImageQueueJobsFromProductionService({
+        productionAppService,
+        commercialProject,
+        providerMode,
+        events: productionEvents,
+      }),
+      findPlannedJobs: (jobs) => jobs.filter((job) => (
+        job.type === "shot.image" && (job.shotId === shotId || job.targetId === shotId)
+      )),
+      buildFallbackJobs: () => {
+        const target = getActiveBusinessShotEntries().find((entry) => entry.shot.id === shotId) || null;
+        if (!target) return [];
+        return buildShotImageJobs(target.node.id, [target.shot], {
+          settings,
+          assets: commercialProject?.activeEpisode?.assets || [],
+          buildImageShotPrompt: (item) => item.imagePrompt || buildImageShotPrompt(item, assetIndex, resourceIndex),
+          resolveShotImageProviderMode: () => providerMode,
+        });
+      },
+      emptyResult: () => ({ title: "镜头图片未入队", summary: `${shotId} 没有可执行的图片任务，请检查图片提示词或供应商模式。` }),
+      decorateJobs: (jobs) => options.reviewComment
+        ? jobs.map((job) => ({ ...job, reviewRepair: true, reviewComment: options.reviewComment }))
+        : jobs,
+      beforeCommit: () => {
+        if (!options.reviewComment) return;
+        projectCommandService.updateShotReviewStatus({
+          episodeId: commercialProject?.activeEpisode?.id || activeEpisodeId,
+          shotId,
+          reviewStatus: "返修中",
+          comment: options.reviewComment,
+          reviewer: "studio",
+          reviewedAt: new Date().toISOString(),
+        });
+      },
+      productionCommandContext,
+      commitPlannedQueueJobs,
+      setShowQueue,
+      successTitle: "镜头图片已入队",
+      successMessage: `已加入 ${shotId} 的图片生成任务。`,
+      metricLabel: "图片任务",
     });
-    const plannedJobs = (productionPlan.jobs || []).filter((job) => (
-      job.type === "shot.image" && (job.shotId === shotId || job.targetId === shotId)
-    ));
-    const target = getActiveBusinessShotEntries().find((entry) => entry.shot.id === shotId) || null;
-    const fallbackJobs = plannedJobs.length || !target
-      ? plannedJobs
-      : buildShotImageJobs(target.node.id, [target.shot], {
-        settings,
-        assets: commercialProject?.activeEpisode?.assets || [],
-        buildImageShotPrompt: (item) => item.imagePrompt || buildImageShotPrompt(item, assetIndex, resourceIndex),
-        resolveShotImageProviderMode: () => providerMode,
-      });
-    if (!fallbackJobs.length) {
-      const summary = `${shotId} 没有可执行的图片任务，请检查图片提示词或供应商模式。`;
-      setProjectMessage(summary);
-      return { title: "镜头图片未入队", summary };
-    }
-    const queueJobs = options.reviewComment
-      ? fallbackJobs.map((job) => ({ ...job, reviewRepair: true, reviewComment: options.reviewComment }))
-      : fallbackJobs;
-    if (options.reviewComment) {
-      projectCommandService.updateShotReviewStatus({
-        episodeId: commercialProject?.activeEpisode?.id || activeEpisodeId,
-        shotId,
-        reviewStatus: "返修中",
-        comment: options.reviewComment,
-        reviewer: "studio",
-        reviewedAt: new Date().toISOString(),
-      });
-    }
-    commitPlannedQueueJobs(productionCommandContext, { ...productionPlan, jobs: queueJobs }, {
-      autoRun: options.autoRun !== false,
-      message: `已加入 ${shotId} 的图片生成任务。`,
-    });
-    setShowQueue(true);
-    const summary = `已加入 ${shotId} 的图片生成任务。`;
-    return { title: "镜头图片已入队", summary, metrics: [{ label: "图片任务", value: fallbackJobs.length }] };
   }
 
   async function queueActiveShotVideo(shot = {}, options = {}) {
     const shotId = String(shot.id || "").trim();
-    if (!shotId) {
-      const summary = "当前镜头缺少编号，无法加入视频生成任务。";
-      setProjectMessage(summary);
-      return { title: "镜头视频未入队", summary };
-    }
     const providerMode = normalizeVideoProviderMode(options.providerMode || currentProviderMode(settings));
-    const preflight = checkVideoTaskPreflight(commercialProject, { shot });
-    if (!preflight.ok) {
-      notifyTaskBlocked(preflight.message);
-      return { title: "镜头视频未入队", summary: preflight.message };
-    }
-    if (!(await ensureProviderReady("video", providerMode))) {
-      return { title: "视频任务未入队", summary: "视频供应商连接或配置未通过体检。" };
-    }
-    if (providerMode === "upload") {
-      const summary = `${shotId} 已切换为本地上传，请选择视频文件。`;
-      setProjectMessage(summary);
-      return { title: "等待上传", summary };
-    }
-    const productionPlan = planVideoQueueJobsFromProductionService({
-      productionAppService,
-      commercialProject,
+    return queueTargetMediaAction({
+      mediaKind: "video",
+      targetId: shotId,
+      targetLabel: "镜头视频",
+      targetMissingResult: { title: "镜头视频未入队", summary: "当前镜头缺少编号，无法加入视频生成任务。" },
       providerMode,
-      events: productionEvents,
+      options,
+      checkPreflight: () => checkVideoTaskPreflight(commercialProject, { shot }),
+      notifyTaskBlocked,
+      ensureProviderReady,
+      uploadSummary: providerMode === "upload" ? `${shotId} 已切换为本地上传，请选择视频文件。` : "",
+      setProjectMessage,
+      planProductionJobs: () => planVideoQueueJobsFromProductionService({
+        productionAppService,
+        commercialProject,
+        providerMode,
+        events: productionEvents,
+      }),
+      findPlannedJobs: (jobs) => jobs.filter((job) => (
+        job.type === "shot.video" && (job.shotId === shotId || job.targetId === shotId)
+      )),
+      buildFallbackJobs: () => {
+        const target = getActiveBusinessShotEntries().find((entry) => entry.shot.id === shotId) || null;
+        if (!target) return [];
+        return [buildShotVideoJob(target.node.id, target.shot, {
+          settings,
+          buildVideoShotPrompt: (item) => item.videoPrompt || buildVideoShotPrompt(item, assetIndex, resourceIndex),
+          resolveShotVideoProviderMode: () => providerMode,
+        })].filter(Boolean);
+      },
+      emptyResult: () => ({ title: "镜头视频未入队", summary: `${shotId} 没有可执行的视频任务，请检查视频提示词或供应商模式。` }),
+      decorateJobs: (jobs) => options.reviewComment
+        ? jobs.map((job) => ({ ...job, reviewRepair: true, reviewComment: options.reviewComment }))
+        : jobs,
+      beforeCommit: () => {
+        if (!options.reviewComment) return;
+        projectCommandService.updateShotReviewStatus({
+          episodeId: commercialProject?.activeEpisode?.id || activeEpisodeId,
+          shotId,
+          reviewStatus: "返修中",
+          comment: options.reviewComment,
+          reviewer: "studio",
+          reviewedAt: new Date().toISOString(),
+        });
+      },
+      productionCommandContext,
+      commitPlannedQueueJobs,
+      setShowQueue,
+      successTitle: "镜头视频已入队",
+      successMessage: `已加入 ${shotId} 的视频生成任务。`,
+      metricLabel: "视频任务",
     });
-    const plannedJobs = (productionPlan.jobs || []).filter((job) => (
-      job.type === "shot.video" && (job.shotId === shotId || job.targetId === shotId)
-    ));
-    const target = getActiveBusinessShotEntries().find((entry) => entry.shot.id === shotId) || null;
-    const fallbackJobs = plannedJobs.length || !target
-      ? plannedJobs
-      : [buildShotVideoJob(target.node.id, target.shot, {
-        settings,
-        buildVideoShotPrompt: (item) => item.videoPrompt || buildVideoShotPrompt(item, assetIndex, resourceIndex),
-        resolveShotVideoProviderMode: () => providerMode,
-      })].filter(Boolean);
-    if (!fallbackJobs.length) {
-      const summary = `${shotId} 没有可执行的视频任务，请检查视频提示词或供应商模式。`;
-      setProjectMessage(summary);
-      return { title: "镜头视频未入队", summary };
-    }
-    const queueJobs = options.reviewComment
-      ? fallbackJobs.map((job) => ({ ...job, reviewRepair: true, reviewComment: options.reviewComment }))
-      : fallbackJobs;
-    if (options.reviewComment) {
-      projectCommandService.updateShotReviewStatus({
-        episodeId: commercialProject?.activeEpisode?.id || activeEpisodeId,
-        shotId,
-        reviewStatus: "返修中",
-        comment: options.reviewComment,
-        reviewer: "studio",
-        reviewedAt: new Date().toISOString(),
-      });
-    }
-    commitPlannedQueueJobs(productionCommandContext, { ...productionPlan, jobs: queueJobs }, {
-      autoRun: options.autoRun !== false,
-      message: `已加入 ${shotId} 的视频生成任务。`,
-    });
-    setShowQueue(true);
-    const summary = `已加入 ${shotId} 的视频生成任务。`;
-    return { title: "镜头视频已入队", summary, metrics: [{ label: "视频任务", value: fallbackJobs.length }] };
   }
 
   async function queueActiveEpisodeVideos(options = {}) {

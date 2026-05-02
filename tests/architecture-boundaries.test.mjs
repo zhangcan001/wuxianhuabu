@@ -338,7 +338,7 @@ test("main app stays under the current responsibility budget", () => {
   const content = readFileSync(join(root, "src", "main.jsx"), "utf8");
   const lines = content.split(/\r?\n/).length;
 
-  assert.ok(lines <= 11520, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
+  assert.ok(lines <= 11500, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
 });
 
 test("app action modules stay free of React and Tauri runtime imports", () => {

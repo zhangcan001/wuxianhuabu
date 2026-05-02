@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   commitProductionPlanQueueJobs,
   queueEpisodeMediaAction,
+  queueTargetMediaAction,
 } from "../src/app/production-media-queue-actions.js";
 
 test("commitProductionPlanQueueJobs commits image jobs and opens queue", () => {
@@ -99,4 +100,71 @@ test("queueEpisodeMediaAction reports upload mode as manual work", async () => {
 
   assert.deepEqual(result, { title: "等待上传", summary: "请选择本地图片。" });
   assert.deepEqual(messages, ["请选择本地图片。"]);
+});
+
+test("queueTargetMediaAction reports a missing target id", async () => {
+  const messages = [];
+  const result = await queueTargetMediaAction({
+    targetId: "",
+    targetMissingResult: { title: "缺少目标", summary: "无法定位目标。" },
+    setProjectMessage: (message) => messages.push(message),
+  });
+
+  assert.deepEqual(result, { title: "缺少目标", summary: "无法定位目标。" });
+  assert.deepEqual(messages, ["无法定位目标。"]);
+});
+
+test("queueTargetMediaAction commits fallback jobs", async () => {
+  const calls = [];
+  const result = await queueTargetMediaAction({
+    mediaKind: "image",
+    targetId: "S01",
+    providerMode: "api",
+    options: { autoRun: false },
+    checkPreflight: () => ({ ok: true }),
+    ensureProviderReady: async () => true,
+    planProductionJobs: () => ({ jobs: [] }),
+    findPlannedJobs: (jobs) => jobs,
+    buildFallbackJobs: () => [{ id: "fallback" }],
+    productionCommandContext: { id: "ctx" },
+    commitPlannedQueueJobs: (context, plan, options) => calls.push(["commit", context.id, plan.jobs.length, options.message, options.autoRun]),
+    setShowQueue: (value) => calls.push(["queue", value]),
+    successTitle: "镜头图片已入队",
+    successMessage: "已加入 S01 的图片生成任务。",
+    metricLabel: "图片任务",
+  });
+
+  assert.deepEqual(result, {
+    title: "镜头图片已入队",
+    summary: "已加入 S01 的图片生成任务。",
+    metrics: [{ label: "图片任务", value: 1 }],
+  });
+  assert.deepEqual(calls, [
+    ["commit", "ctx", 1, "已加入 S01 的图片生成任务。", false],
+    ["queue", true],
+  ]);
+});
+
+test("queueTargetMediaAction decorates review repair jobs before commit", async () => {
+  const calls = [];
+  const result = await queueTargetMediaAction({
+    mediaKind: "video",
+    targetId: "S02",
+    providerMode: "api",
+    checkPreflight: () => ({ ok: true }),
+    ensureProviderReady: async () => true,
+    planProductionJobs: () => ({ jobs: [{ id: "planned" }] }),
+    findPlannedJobs: (jobs) => jobs,
+    decorateJobs: (jobs) => jobs.map((job) => ({ ...job, reviewRepair: true })),
+    beforeCommit: () => calls.push(["before"]),
+    productionCommandContext: {},
+    commitPlannedQueueJobs: (context, plan) => calls.push(["commit", plan.jobs[0].reviewRepair]),
+    setShowQueue: () => {},
+  });
+
+  assert.equal(result.title, "视频已入队");
+  assert.deepEqual(calls, [
+    ["before"],
+    ["commit", true],
+  ]);
 });
