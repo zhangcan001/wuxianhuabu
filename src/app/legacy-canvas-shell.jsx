@@ -31,6 +31,7 @@ export function LegacyCanvasOverlay({
   renderNodes = [],
   guardNode: GuardNode,
   nodeComponent: NodeComponent,
+  nodeRuntime,
   nodeMenuItems = [],
   drag,
   highlightedNodeId,
@@ -164,6 +165,7 @@ export function LegacyCanvasOverlay({
                 handleResultShotAction={handleResultShotAction}
                 createPromptNodeFromAsset={createPromptNodeFromAsset}
                 locateResultForShot={locateResultForShot}
+                runtime={nodeRuntime}
               />
             </GuardNode>
           );

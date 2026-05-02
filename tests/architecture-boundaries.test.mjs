@@ -81,6 +81,7 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
   const content = readFileSync(join(root, "src", "main.jsx"), "utf8");
   const workspaceNavigation = readFileSync(join(root, "src", "app", "workspace-navigation.js"), "utf8");
   const legacyCanvasShell = readFileSync(join(root, "src", "app", "legacy-canvas-shell.jsx"), "utf8");
+  const canvasNode = readFileSync(join(root, "src", "app", "canvas-node.jsx"), "utf8");
   const panelPropBuilders = readFileSync(join(root, "src", "app", "panel-prop-builders.js"), "utf8");
 
   assert.match(content, /showCompatibilityCanvas/);
@@ -89,6 +90,9 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
   assert.match(legacyCanvasShell, /<svg className="edge-layer"/);
   assert.match(content, /onDoubleClick=\{showCompatibilityCanvas \? handleStageDoubleClick : undefined\}/);
   assert.match(content, /<LegacyCanvasOverlay/);
+  assert.match(content, /nodeComponent=\{CanvasNode\}/);
+  assert.match(canvasNode, /export function CanvasNode/);
+  assert.match(canvasNode, /LazyShotListNode/);
   assert.match(content, /\{showCompatibilityCanvas && performanceSettings\.showMinimap && \(/);
   assert.match(content, /function openProductionStudio/);
   assert.match(content, /function openProductionStudioView/);
@@ -107,6 +111,7 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
   assert.doesNotMatch(content, /if \(actionKey === "queue"\)/);
   assert.doesNotMatch(content, /setShowDashboard\(false\);\s*setShowHealth\(false\);/);
   assert.doesNotMatch(content, /setSettingsFocus\(focus\);\s*refreshGlobalApiConfigs\(\);/);
+  assert.doesNotMatch(content, /function CanvasNode/);
 });
 
 test("timeline panel is a real split panel and no longer re-exports production-panels", () => {
@@ -331,7 +336,7 @@ test("main app stays under the current responsibility budget", () => {
   const content = readFileSync(join(root, "src", "main.jsx"), "utf8");
   const lines = content.split(/\r?\n/).length;
 
-  assert.ok(lines <= 11820, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
+  assert.ok(lines <= 11620, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
 });
 
 test("app action modules stay free of React and Tauri runtime imports", () => {
@@ -368,6 +373,7 @@ test("new app orchestration modules own extracted main responsibilities", () => 
     "production-media-queue-actions.js",
     "panel-prop-builders.js",
     "legacy-canvas-shell.jsx",
+    "canvas-node.jsx",
     "health-fix-prompts.js",
     "media-provider-runtime.js",
   ];
