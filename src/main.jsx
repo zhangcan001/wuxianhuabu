@@ -538,17 +538,13 @@ import {
   buildProjectStudioProps,
 } from "./app/panel-prop-builders.js";
 import {
-  CanvasNode,
-} from "./app/canvas-node.jsx";
-import {
   createPanoramaScene,
   makeVrGrid,
   renderPerspectiveFromPanorama,
 } from "./app/panorama-runtime.js";
 import {
   LegacyCanvasBanner,
-  LegacyCanvasOverlay,
-} from "./app/legacy-canvas-shell.jsx";
+} from "./app/legacy-canvas-banner.jsx";
 import {
   appendPipelineSyncAction,
   buildPipelineSyncExecutionPlan,
@@ -592,6 +588,7 @@ import {
   LazyGenerationQueuePanel,
   LazyGlobalAssetPanel,
   LazyGlobalSearchPanel,
+  LazyLegacyCanvasOverlay,
   LazyMinimapPanel,
   LazyModelParamCenterPanel,
   LazyProductionHubPanel,
@@ -6868,88 +6865,91 @@ async function runGenerationQueue() {
       onPointerUp={showCompatibilityCanvas ? endPointer : undefined}
       onPointerLeave={showCompatibilityCanvas ? endPointer : undefined}
     >
-      <LegacyCanvasOverlay
-        show={showCompatibilityCanvas}
-        selectionBox={selectionBox}
-        edgeLayerRef={edgeLayerRef}
-        visibleEdges={visibleEdges}
-        nodeById={nodeById}
-        view={view}
-        selectedEdgeId={selectedEdgeId}
-        selectEdge={(edgeId) => {
-          setSelectedEdgeId(edgeId);
-          setNodes((current) => current.map((node) => ({ ...node, selected: false })));
-          setMenu(null);
-          setNodeMenu(null);
-          setEdgeMenu(null);
-        }}
-        openEdgeMenu={(edgeId, event) => {
-          setSelectedEdgeId(edgeId);
-          setEdgeMenu({ edgeId, screenX: event.clientX, screenY: event.clientY });
-          setNodeMenu(null);
-          setMenu(null);
-        }}
-        connectionDrag={connectionDrag}
-        worldRef={worldRef}
-        renderNodes={renderNodes}
-        guardNode={GuardedNode}
-        nodeComponent={CanvasNode}
-        nodeRuntime={canvasNodeRuntime}
-        nodeMenuItems={NODE_MENU}
-        drag={drag}
-        highlightedNodeId={highlightedNodeId}
-        nodes={nodes}
-        selectedNodeIds={selectedNodeIds}
-        marqueeMode={marqueeMode}
-        shiftPressedRef={shiftPressedRef}
-        updateNode={updateNode}
-        selectNode={selectNode}
-        setDrag={setDrag}
-        setResize={setResize}
-        addNode={addNode}
-        connectFromLast={connectFromLast}
-        createOutputNear={createOutputNear}
-        createManyOutputs={createManyOutputs}
-        deleteNode={deleteNode}
-        duplicateNode={duplicateNode}
-        openNodeMenu={(nodeId, event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          selectNode(nodeId);
-          setNodeMenu({ nodeId, screenX: event.clientX, screenY: event.clientY });
-          setMenu(null);
-          setEdgeMenu(null);
-        }}
-        startConnection={startConnection}
-        finishConnection={finishConnection}
-        pushHistory={pushHistory}
-        settings={settings}
-        textApiSettings={textApiSettings}
-        patchTextApiSettings={patchTextApiSettings}
-        openSettings={openSettingsPanel}
-        stylePresetCenter={stylePresetCenter}
-        onOpenStylePresetCenter={() => setShowStylePresetCenter(true)}
-        viewRef={viewRef}
-        assetIndex={assetIndex}
-        openPromptPreview={(payload) => setPromptPreview(payload)}
-        addGenerationJobs={(jobs) => addGenerationJobsAndMaybeRun(jobs, { autoRun: true })}
-        resourceIndex={resourceIndex}
-        importShotsToTimeline={importShotsToTimeline}
-        syncPipelineToLinkedNodes={syncPipelineToLinkedNodes}
-        sendImageToLinkedNode={sendImageToLinkedNode}
-        appendShotsToNearestShotList={appendShotsToNearestShotList}
-        applyResultToNearestShot={applyResultToNearestShot}
-        handleResultShotAction={handleResultShotAction}
-        createPromptNodeFromAsset={createPromptNodeFromAsset}
-        locateResultForShot={locateResultForShot}
-        visibleNodes={visibleNodes}
-        activeEpisodeName={episodes.find((episode) => episode.id === activeEpisodeId)?.name}
-        menu={menu}
-        nodeMenu={nodeMenu}
-        edgeMenu={edgeMenu}
-        sendResultToSplit={sendResultToSplit}
-        deleteEdge={deleteEdge}
-      />
+      {showCompatibilityCanvas && (
+        <Suspense fallback={<PanelLoadingFallback label="正在打开兼容画布" />}>
+          <LazyLegacyCanvasOverlay
+            show
+            selectionBox={selectionBox}
+            edgeLayerRef={edgeLayerRef}
+            visibleEdges={visibleEdges}
+            nodeById={nodeById}
+            view={view}
+            selectedEdgeId={selectedEdgeId}
+            selectEdge={(edgeId) => {
+              setSelectedEdgeId(edgeId);
+              setNodes((current) => current.map((node) => ({ ...node, selected: false })));
+              setMenu(null);
+              setNodeMenu(null);
+              setEdgeMenu(null);
+            }}
+            openEdgeMenu={(edgeId, event) => {
+              setSelectedEdgeId(edgeId);
+              setEdgeMenu({ edgeId, screenX: event.clientX, screenY: event.clientY });
+              setNodeMenu(null);
+              setMenu(null);
+            }}
+            connectionDrag={connectionDrag}
+            worldRef={worldRef}
+            renderNodes={renderNodes}
+            guardNode={GuardedNode}
+            nodeRuntime={canvasNodeRuntime}
+            nodeMenuItems={NODE_MENU}
+            drag={drag}
+            highlightedNodeId={highlightedNodeId}
+            nodes={nodes}
+            selectedNodeIds={selectedNodeIds}
+            marqueeMode={marqueeMode}
+            shiftPressedRef={shiftPressedRef}
+            updateNode={updateNode}
+            selectNode={selectNode}
+            setDrag={setDrag}
+            setResize={setResize}
+            addNode={addNode}
+            connectFromLast={connectFromLast}
+            createOutputNear={createOutputNear}
+            createManyOutputs={createManyOutputs}
+            deleteNode={deleteNode}
+            duplicateNode={duplicateNode}
+            openNodeMenu={(nodeId, event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              selectNode(nodeId);
+              setNodeMenu({ nodeId, screenX: event.clientX, screenY: event.clientY });
+              setMenu(null);
+              setEdgeMenu(null);
+            }}
+            startConnection={startConnection}
+            finishConnection={finishConnection}
+            pushHistory={pushHistory}
+            settings={settings}
+            textApiSettings={textApiSettings}
+            patchTextApiSettings={patchTextApiSettings}
+            openSettings={openSettingsPanel}
+            stylePresetCenter={stylePresetCenter}
+            onOpenStylePresetCenter={() => setShowStylePresetCenter(true)}
+            viewRef={viewRef}
+            assetIndex={assetIndex}
+            openPromptPreview={(payload) => setPromptPreview(payload)}
+            addGenerationJobs={(jobs) => addGenerationJobsAndMaybeRun(jobs, { autoRun: true })}
+            resourceIndex={resourceIndex}
+            importShotsToTimeline={importShotsToTimeline}
+            syncPipelineToLinkedNodes={syncPipelineToLinkedNodes}
+            sendImageToLinkedNode={sendImageToLinkedNode}
+            appendShotsToNearestShotList={appendShotsToNearestShotList}
+            applyResultToNearestShot={applyResultToNearestShot}
+            handleResultShotAction={handleResultShotAction}
+            createPromptNodeFromAsset={createPromptNodeFromAsset}
+            locateResultForShot={locateResultForShot}
+            visibleNodes={visibleNodes}
+            activeEpisodeName={episodes.find((episode) => episode.id === activeEpisodeId)?.name}
+            menu={menu}
+            nodeMenu={nodeMenu}
+            edgeMenu={edgeMenu}
+            sendResultToSplit={sendResultToSplit}
+            deleteEdge={deleteEdge}
+          />
+        </Suspense>
+      )}
       {showCompatibilityCanvas && (
         <LegacyCanvasBanner
           onReturnToStudio={() => {

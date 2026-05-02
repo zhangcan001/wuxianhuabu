@@ -3,18 +3,7 @@ import {
   previewEdgePath,
   worldToScreen,
 } from "../canvas-viewport-helpers.js";
-
-export function LegacyCanvasBanner({ onReturnToStudio }) {
-  return (
-    <div className="compat-canvas-banner">
-      <div>
-        <strong>兼容画布</strong>
-        <span>旧节点视图仅用于迁移和高级检查，主数据以生产工作台为准。</span>
-      </div>
-      <button type="button" onClick={onReturnToStudio}>返回生产工作台</button>
-    </div>
-  );
-}
+import { CanvasNode } from "./canvas-node.jsx";
 
 export function LegacyCanvasOverlay({
   show,
@@ -30,7 +19,6 @@ export function LegacyCanvasOverlay({
   worldRef,
   renderNodes = [],
   guardNode: GuardNode,
-  nodeComponent: NodeComponent,
   nodeRuntime,
   nodeMenuItems = [],
   drag,
@@ -124,7 +112,7 @@ export function LegacyCanvasOverlay({
           const label = node.title || nodeMenuItems.find((item) => item.type === node.type)?.label || "节点";
           return (
             <GuardNode key={node.id} label={label} nodeId={node.id}>
-              <NodeComponent
+              <CanvasNode
                 node={node}
                 isDragging={drag?.id === node.id}
                 highlighted={highlightedNodeId === node.id}

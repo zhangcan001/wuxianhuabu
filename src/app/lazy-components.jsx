@@ -44,6 +44,7 @@ export class UiErrorBoundary extends React.Component {
 
 export const LazyProjectDashboardPanel = lazyNamed(() => import("../lazy-panels.jsx"), "ProjectDashboardPanel");
 export const LazyProjectStudio = lazyNamed(() => import("../project-studio.jsx"), "ProjectStudio");
+export const LazyLegacyCanvasOverlay = lazyNamed(() => import("./legacy-canvas-shell.jsx"), "LegacyCanvasOverlay");
 export const LazySimpleWorkflowPanel = lazyNamed(() => import("../lazy-panels.jsx"), "SimpleWorkflowPanel");
 export const LazyGenerationQueuePanel = lazyNamed(() => import("../lazy-panels.jsx"), "GenerationQueuePanel");
 export const LazyTimelinePanel = lazyNamed(() => import("../lazy-panels.jsx"), "TimelinePanel");

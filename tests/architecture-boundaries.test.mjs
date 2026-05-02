@@ -81,16 +81,18 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
   const content = readFileSync(join(root, "src", "main.jsx"), "utf8");
   const workspaceNavigation = readFileSync(join(root, "src", "app", "workspace-navigation.js"), "utf8");
   const legacyCanvasShell = readFileSync(join(root, "src", "app", "legacy-canvas-shell.jsx"), "utf8");
+  const legacyCanvasBanner = readFileSync(join(root, "src", "app", "legacy-canvas-banner.jsx"), "utf8");
+  const lazyComponents = readFileSync(join(root, "src", "app", "lazy-components.jsx"), "utf8");
   const canvasNode = readFileSync(join(root, "src", "app", "canvas-node.jsx"), "utf8");
   const panelPropBuilders = readFileSync(join(root, "src", "app", "panel-prop-builders.js"), "utf8");
 
   assert.match(content, /showCompatibilityCanvas/);
-  assert.match(legacyCanvasShell, /compat-canvas-banner/);
+  assert.match(legacyCanvasBanner, /compat-canvas-banner/);
   assert.match(legacyCanvasShell, /export function LegacyCanvasOverlay/);
   assert.match(legacyCanvasShell, /<svg className="edge-layer"/);
   assert.match(content, /onDoubleClick=\{showCompatibilityCanvas \? handleStageDoubleClick : undefined\}/);
-  assert.match(content, /<LegacyCanvasOverlay/);
-  assert.match(content, /nodeComponent=\{CanvasNode\}/);
+  assert.match(content, /<LazyLegacyCanvasOverlay/);
+  assert.match(lazyComponents, /LazyLegacyCanvasOverlay/);
   assert.match(canvasNode, /export function CanvasNode/);
   assert.match(canvasNode, /LazyShotListNode/);
   assert.match(content, /\{showCompatibilityCanvas && performanceSettings\.showMinimap && \(/);
@@ -100,7 +102,7 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
   assert.match(content, /buildProjectStudioProps/);
   assert.match(panelPropBuilders, /activeViewRequest:\s*input\.studioViewRequest/);
   assert.match(content, /workspace-navigation\.js/);
-  assert.match(content, /legacy-canvas-shell\.jsx/);
+  assert.match(content, /legacy-canvas-banner\.jsx/);
   assert.match(content, /panorama-runtime\.js/);
   assert.match(workspaceNavigation, /openAdvancedCanvasNavigation/);
   assert.match(workspaceNavigation, /openProductionStudioViewNavigation/);
@@ -113,6 +115,7 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
   assert.doesNotMatch(content, /setShowDashboard\(false\);\s*setShowHealth\(false\);/);
   assert.doesNotMatch(content, /setSettingsFocus\(focus\);\s*refreshGlobalApiConfigs\(\);/);
   assert.doesNotMatch(content, /function CanvasNode/);
+  assert.doesNotMatch(content, /nodeComponent=\{CanvasNode\}/);
   assert.doesNotMatch(content, /let threeModulePromise/);
 });
 
@@ -374,6 +377,7 @@ test("new app orchestration modules own extracted main responsibilities", () => 
     "system-self-check-action.js",
     "production-media-queue-actions.js",
     "panel-prop-builders.js",
+    "legacy-canvas-banner.jsx",
     "legacy-canvas-shell.jsx",
     "canvas-node.jsx",
     "panorama-runtime.js",
