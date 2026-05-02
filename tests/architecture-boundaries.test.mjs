@@ -104,6 +104,9 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
   assert.match(content, /workspace-navigation\.js/);
   assert.match(content, /legacy-canvas-banner\.jsx/);
   assert.match(content, /panorama-runtime\.js/);
+  assert.match(content, /syncCanvasNodesToProjectStore/);
+  assert.match(content, /patchCanvasNodeAndSyncProjectStore/);
+  assert.doesNotMatch(content, /reduceCanvasNodeEditToProjectStore/);
   assert.match(workspaceNavigation, /openAdvancedCanvasNavigation/);
   assert.match(workspaceNavigation, /openProductionStudioViewNavigation/);
   assert.match(workspaceNavigation, /openSettingsPanelNavigation/);

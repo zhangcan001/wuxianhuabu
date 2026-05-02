@@ -51,6 +51,60 @@ export function reduceCanvasNodeEditToProjectStore({
   });
 }
 
+export function syncCanvasNodesToProjectStore({
+  storeState,
+  nextNodes = [],
+  previousNodes = [],
+  reducer = projectStoreReducer,
+} = {}) {
+  const previousById = new Map((Array.isArray(previousNodes) ? previousNodes : []).map((node) => [node.id, node]));
+  let nextStoreState = storeState;
+  const syncedNodeIds = [];
+  (Array.isArray(nextNodes) ? nextNodes : []).forEach((node) => {
+    if (previousById.get(node.id) === node) return;
+    const reduced = reduceCanvasNodeEditToProjectStore({
+      storeState: nextStoreState,
+      node,
+      reducer,
+    });
+    if (reduced !== nextStoreState) {
+      nextStoreState = reduced;
+      syncedNodeIds.push(node.id);
+    }
+  });
+  return {
+    storeState: nextStoreState,
+    changed: nextStoreState !== storeState,
+    syncedNodeIds,
+  };
+}
+
+export function patchCanvasNodeAndSyncProjectStore({
+  storeState,
+  node,
+  patch = {},
+  reducer = projectStoreReducer,
+} = {}) {
+  if (!node) {
+    return {
+      node,
+      storeState,
+      changed: false,
+    };
+  }
+  const nextNode = { ...node, data: { ...node.data, ...patch } };
+  const nextStoreState = reduceCanvasNodeEditToProjectStore({
+    storeState,
+    node: nextNode,
+    reducer,
+  });
+  return {
+    node: nextNode,
+    storeState: nextStoreState,
+    changed: nextStoreState !== storeState,
+  };
+}
+
 export function isBusinessCanvasNode(node = {}) {
   return ["novelPipeline", "assetLibrary", "shotList"].includes(node.type);
 }

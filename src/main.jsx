@@ -123,8 +123,9 @@ import {
 import {
   materializeLegacyCanvasFromBusinessProject,
   mergeAdvancedCanvasProjection,
-  reduceCanvasNodeEditToProjectStore,
+  patchCanvasNodeAndSyncProjectStore,
   reduceProjectStoreWithCanvasCompatibility,
+  syncCanvasNodesToProjectStore,
 } from "./app/project-canvas-compatibility.js";
 import {
   applyCanvasNodeToProject,
@@ -1442,23 +1443,14 @@ function App() {
   }
 
   function syncBusinessCanvasNodesToProjectStore(nextNodes = [], previousNodes = []) {
-    const previousById = new Map((Array.isArray(previousNodes) ? previousNodes : []).map((node) => [node.id, node]));
-    let nextStoreState = projectStoreStateRef.current;
-    let changed = false;
-    (Array.isArray(nextNodes) ? nextNodes : []).forEach((node) => {
-      if (previousById.get(node.id) === node) return;
-      const reduced = reduceCanvasNodeEditToProjectStore({
-        storeState: nextStoreState,
-        node,
-      });
-      if (reduced !== nextStoreState) {
-        nextStoreState = reduced;
-        changed = true;
-      }
+    const result = syncCanvasNodesToProjectStore({
+      storeState: projectStoreStateRef.current,
+      nextNodes,
+      previousNodes,
     });
-    if (!changed) return false;
-    projectStoreStateRef.current = nextStoreState;
-    setProjectStoreState(nextStoreState);
+    if (!result.changed) return false;
+    projectStoreStateRef.current = result.storeState;
+    setProjectStoreState(result.storeState);
     return true;
   }
 
@@ -4970,16 +4962,16 @@ async function runGenerationQueue() {
     if (!options.skipHistory) pushHistory();
     setNodes((current) => current.map((node) => {
       if (node.id !== id) return node;
-      const nextNode = { ...node, data: { ...node.data, ...patch } };
-      const nextStoreState = reduceCanvasNodeEditToProjectStore({
+      const result = patchCanvasNodeAndSyncProjectStore({
         storeState: projectStoreStateRef.current,
-        node: nextNode,
+        node,
+        patch,
       });
-      if (nextStoreState !== projectStoreStateRef.current) {
-        projectStoreStateRef.current = nextStoreState;
-        setProjectStoreState(nextStoreState);
+      if (result.changed) {
+        projectStoreStateRef.current = result.storeState;
+        setProjectStoreState(result.storeState);
       }
-      return nextNode;
+      return result.node;
     }));
   }
 

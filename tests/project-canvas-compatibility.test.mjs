@@ -4,8 +4,10 @@ import {
   isBusinessCanvasNode,
   materializeLegacyCanvasFromBusinessProject,
   mergeAdvancedCanvasProjection,
+  patchCanvasNodeAndSyncProjectStore,
   reduceCanvasNodeEditToProjectStore,
   reduceProjectStoreWithCanvasCompatibility,
+  syncCanvasNodesToProjectStore,
 } from "../src/app/project-canvas-compatibility.js";
 import {
   createProjectStoreState,
@@ -128,6 +130,68 @@ test("canvas compatibility ignores non-business canvas nodes", () => {
 
   assert.equal(isBusinessCanvasNode(node), false);
   assert.equal(reduceCanvasNodeEditToProjectStore({ storeState: state, node }), state);
+});
+
+test("syncCanvasNodesToProjectStore batches changed business nodes only", () => {
+  const state = createProjectStoreState(businessProject(), { source: "test" });
+  const previousShotNode = {
+    id: "episode-ep-1-shots",
+    type: "shotList",
+    data: { episodeId: "ep-1", shots: [{ id: "s1", title: "镜头 1", imagePrompt: "old prompt" }] },
+  };
+  const result = syncCanvasNodesToProjectStore({
+    storeState: state,
+    previousNodes: [
+      previousShotNode,
+      { id: "note-1", type: "text", data: { text: "old" } },
+    ],
+    nextNodes: [
+      {
+        ...previousShotNode,
+        data: { episodeId: "ep-1", shots: [{ id: "s1", title: "镜头 1", imagePrompt: "batched prompt" }] },
+      },
+      { id: "note-1", type: "text", data: { text: "new" } },
+    ],
+  });
+
+  assert.equal(result.changed, true);
+  assert.deepEqual(result.syncedNodeIds, ["episode-ep-1-shots"]);
+  assert.equal(result.storeState.project.episodes[0].shots[0].imagePrompt, "batched prompt");
+});
+
+test("patchCanvasNodeAndSyncProjectStore patches a node and returns synced store state", () => {
+  const state = createProjectStoreState(businessProject(), { source: "test" });
+  const result = patchCanvasNodeAndSyncProjectStore({
+    storeState: state,
+    node: {
+      id: "episode-ep-1-shots",
+      type: "shotList",
+      data: {
+        episodeId: "ep-1",
+        shots: [{ id: "s1", title: "镜头 1", imagePrompt: "old prompt" }],
+      },
+    },
+    patch: {
+      shots: [{ id: "s1", title: "镜头 1", imagePrompt: "patched prompt" }],
+    },
+  });
+
+  assert.equal(result.changed, true);
+  assert.equal(result.node.data.shots[0].imagePrompt, "patched prompt");
+  assert.equal(result.storeState.project.episodes[0].shots[0].imagePrompt, "patched prompt");
+});
+
+test("patchCanvasNodeAndSyncProjectStore leaves non-business nodes as canvas-only state", () => {
+  const state = createProjectStoreState(businessProject(), { source: "test" });
+  const result = patchCanvasNodeAndSyncProjectStore({
+    storeState: state,
+    node: { id: "note-1", type: "text", data: { text: "old" } },
+    patch: { text: "new" },
+  });
+
+  assert.equal(result.changed, false);
+  assert.equal(result.node.data.text, "new");
+  assert.equal(result.storeState, state);
 });
 
 test("mergeAdvancedCanvasProjection merges projected nodes into existing canvas", () => {
