@@ -533,13 +533,14 @@ import {
   runFullChainCheckAction,
 } from "./app/full-chain-check-action.js";
 import {
-  commitProductionPlanQueueJobs,
+  queueEpisodeMediaAction,
 } from "./app/production-media-queue-actions.js";
 import {
   buildProjectStudioProps,
 } from "./app/panel-prop-builders.js";
 import {
   LegacyCanvasBanner,
+  LegacyCanvasOverlay,
 } from "./app/legacy-canvas-shell.jsx";
 import {
   appendPipelineSyncAction,
@@ -5591,65 +5592,51 @@ async function runGenerationQueue() {
   
     async function queueActiveEpisodeImages(options = {}) {
     const providerMode = normalizeImageProviderMode(options.providerMode || currentProviderMode(settings));
-    const preflight = checkImageTaskPreflight(commercialProject);
-    if (!preflight.ok) {
-      notifyTaskBlocked(preflight.message);
-      return { title: "图片任务未入队", summary: preflight.message };
-    }
-    if (!(await ensureProviderReady("image", providerMode))) {
-      return { title: "图片任务未入队", summary: "图片供应商连接或配置未通过体检。" };
-    }
-    if (providerMode === "upload") {
-      const summary = "当前已切换为本地上传，请在镜头表或媒体生产页选择图片文件。";
-      setProjectMessage(summary);
-      return { title: "等待上传", summary };
-    }
-    const productionPlan = planImageQueueJobsFromProductionService({
-      productionAppService,
-      commercialProject,
+    return queueEpisodeMediaAction({
+      mediaKind: "image",
       providerMode,
-      events: productionEvents,
-    });
-    const productionJobs = productionPlan.jobs || [];
-    if (productionJobs.length) {
-      return commitProductionPlanQueueJobs({
-        productionCommandContext,
-        productionPlan,
-        jobs: productionJobs,
-        options,
-        commitPlannedQueueJobs,
-        setShowQueue,
-        mediaKind: "image",
-      });
-    }
-    const businessEpisode = commercialProject?.activeEpisode;
-    const entries = getActiveBusinessShotEntries()
-      .filter(({ shot }) => !String(shot.imageResultUrl || "").trim());
-    const jobs = entries.flatMap(({ node, shot }) => buildShotImageJobs(node.id, [shot], {
-      settings,
-      assets: businessEpisode?.assets || [],
-      buildImageShotPrompt: (item) => item.imagePrompt || buildImageShotPrompt(item, assetIndex, resourceIndex),
-      resolveShotImageProviderMode,
-    }));
-    const command = prepareImageQueueCommand({
-      episode: businessEpisode,
-      businessOptions: {
-        requireSourceNode: true,
-        settings,
-        buildImageShotPrompt: (item) => item.imagePrompt || buildImageShotPrompt(item, assetIndex, resourceIndex),
-        resolveShotImageProviderMode,
+      options,
+      checkPreflight: () => checkImageTaskPreflight(commercialProject),
+      notifyTaskBlocked,
+      ensureProviderReady,
+      uploadSummary: providerMode === "upload"
+        ? "当前已切换为本地上传，请在镜头表或媒体生产页选择图片文件。"
+        : "",
+      setProjectMessage,
+      planProductionJobs: () => planImageQueueJobsFromProductionService({
+        productionAppService,
+        commercialProject,
+        providerMode,
+        events: productionEvents,
+      }),
+      productionCommandContext,
+      commitPlannedQueueJobs,
+      setShowQueue,
+      buildLegacyJobs: () => {
+        const businessEpisode = commercialProject?.activeEpisode;
+        const entries = getActiveBusinessShotEntries()
+          .filter(({ shot }) => !String(shot.imageResultUrl || "").trim());
+        const jobs = entries.flatMap(({ node, shot }) => buildShotImageJobs(node.id, [shot], {
+          settings,
+          assets: businessEpisode?.assets || [],
+          buildImageShotPrompt: (item) => item.imagePrompt || buildImageShotPrompt(item, assetIndex, resourceIndex),
+          resolveShotImageProviderMode,
+        }));
+        return { businessEpisode, entries, jobs };
       },
-      legacyJobs: jobs,
-      legacyEntryCount: entries.length,
+      prepareCommand: ({ businessEpisode, entries, jobs }) => prepareImageQueueCommand({
+        episode: businessEpisode,
+        businessOptions: {
+          requireSourceNode: true,
+          settings,
+          buildImageShotPrompt: (item) => item.imagePrompt || buildImageShotPrompt(item, assetIndex, resourceIndex),
+          resolveShotImageProviderMode,
+        },
+        legacyJobs: jobs,
+        legacyEntryCount: entries.length,
+      }),
+      addGenerationJobsAndMaybeRun,
     });
-    if (!command.ok) {
-      setProjectMessage(command.message);
-      return command.result;
-    }
-    addGenerationJobsAndMaybeRun(command.jobs, { autoRun: options.autoRun !== false });
-    setShowQueue(true);
-    setProjectMessage(command.message);
-    return command.result;
   }
 
   async function queueActiveAssetImage(asset = {}, options = {}) {
@@ -5850,61 +5837,49 @@ async function runGenerationQueue() {
 
   async function queueActiveEpisodeVideos(options = {}) {
       const providerMode = normalizeVideoProviderMode(options.providerMode || currentProviderMode(settings));
-      const preflight = checkVideoTaskPreflight(commercialProject);
-      if (!preflight.ok) {
-        notifyTaskBlocked(preflight.message);
-        return { title: "视频任务未入队", summary: preflight.message };
-      }
-      if (!(await ensureProviderReady("video", providerMode))) {
-        return { title: "视频任务未入队", summary: "视频供应商连接或配置未通过体检。" };
-      }
-      const productionPlan = planVideoQueueJobsFromProductionService({
-        productionAppService,
-        commercialProject,
+      return queueEpisodeMediaAction({
+        mediaKind: "video",
         providerMode,
-        events: productionEvents,
-    });
-    const productionJobs = productionPlan.jobs || [];
-    if (productionJobs.length) {
-      return commitProductionPlanQueueJobs({
-        productionCommandContext,
-        productionPlan,
-        jobs: productionJobs,
         options,
+        checkPreflight: () => checkVideoTaskPreflight(commercialProject),
+        notifyTaskBlocked,
+        ensureProviderReady,
+        setProjectMessage,
+        planProductionJobs: () => planVideoQueueJobsFromProductionService({
+          productionAppService,
+          commercialProject,
+          providerMode,
+          events: productionEvents,
+        }),
+        productionCommandContext,
         commitPlannedQueueJobs,
         setShowQueue,
-        mediaKind: "video",
+        buildLegacyJobs: () => {
+          const businessEpisode = commercialProject?.activeEpisode;
+          const entries = getActiveBusinessShotEntries()
+            .filter(({ shot }) => !String(shot.videoResultUrl || "").trim());
+          const jobs = entries
+            .map(({ node, shot }) => buildShotVideoJob(node.id, shot, {
+              settings,
+              buildVideoShotPrompt: (item) => item.videoPrompt || buildVideoShotPrompt(item, assetIndex, resourceIndex),
+              resolveShotVideoProviderMode,
+            }))
+            .filter(Boolean);
+          return { businessEpisode, entries, jobs };
+        },
+        prepareCommand: ({ businessEpisode, entries, jobs }) => prepareVideoQueueCommand({
+          episode: businessEpisode,
+          businessOptions: {
+            requireSourceNode: true,
+            settings,
+            buildVideoShotPrompt: (item) => item.videoPrompt || buildVideoShotPrompt(item, assetIndex, resourceIndex),
+            resolveShotVideoProviderMode,
+          },
+          legacyJobs: jobs,
+          legacyEntryCount: entries.length,
+        }),
+        addGenerationJobsAndMaybeRun,
       });
-    }
-    const businessEpisode = commercialProject?.activeEpisode;
-    const entries = getActiveBusinessShotEntries()
-      .filter(({ shot }) => !String(shot.videoResultUrl || "").trim());
-    const jobs = entries
-      .map(({ node, shot }) => buildShotVideoJob(node.id, shot, {
-        settings,
-        buildVideoShotPrompt: (item) => item.videoPrompt || buildVideoShotPrompt(item, assetIndex, resourceIndex),
-        resolveShotVideoProviderMode,
-      }))
-      .filter(Boolean);
-    const command = prepareVideoQueueCommand({
-      episode: businessEpisode,
-      businessOptions: {
-        requireSourceNode: true,
-        settings,
-        buildVideoShotPrompt: (item) => item.videoPrompt || buildVideoShotPrompt(item, assetIndex, resourceIndex),
-        resolveShotVideoProviderMode,
-      },
-      legacyJobs: jobs,
-      legacyEntryCount: entries.length,
-    });
-    if (!command.ok) {
-      setProjectMessage(command.message);
-      return command.result;
-    }
-    addGenerationJobsAndMaybeRun(command.jobs, { autoRun: options.autoRun !== false });
-    setShowQueue(true);
-    setProjectMessage(command.message);
-    return command.result;
   }
 
   async function ensureProviderReady(kind = "image", providerMode = "") {
@@ -6823,152 +6798,87 @@ async function runGenerationQueue() {
       onPointerUp={showCompatibilityCanvas ? endPointer : undefined}
       onPointerLeave={showCompatibilityCanvas ? endPointer : undefined}
     >
-      {showCompatibilityCanvas && <div className="canvas-bg" />}
-      {showCompatibilityCanvas && selectionBox && (
-        <div
-          style={{
-            position: "fixed",
-            left: Math.min(selectionBox.sx, selectionBox.cx),
-            top: Math.min(selectionBox.sy, selectionBox.cy),
-            width: Math.abs(selectionBox.cx - selectionBox.sx),
-            height: Math.abs(selectionBox.cy - selectionBox.sy),
-            border: "1px solid rgba(118, 203, 255, 0.95)",
-            background: "rgba(66, 173, 255, 0.12)",
-            boxShadow: "0 0 0 1px rgba(66, 173, 255, 0.18) inset",
-            pointerEvents: "none",
-            zIndex: 12,
-          }}
-        />
-      )}
-      {showCompatibilityCanvas && (
-        <svg className="edge-layer" ref={edgeLayerRef}>
-          {visibleEdges.map((edge) => {
-            const source = nodeById.get(edge.source);
-            const target = nodeById.get(edge.target);
-            if (!source || !target) return null;
-            const a = worldToScreen(source.x + source.width, source.y + source.height / 2, view);
-            const b = worldToScreen(target.x, target.y + target.height / 2, view);
-            const mid = Math.max(70, Math.abs(b.x - a.x) / 2);
-            return (
-              <path
-                key={edge.id}
-                data-edge-id={edge.id}
-                className={`edge ${selectedEdgeId === edge.id ? "selected" : ""}`}
-                d={`M ${a.x} ${a.y} C ${a.x + mid} ${a.y}, ${b.x - mid} ${b.y}, ${b.x} ${b.y}`}
-                onPointerDown={(event) => {
-                  event.stopPropagation();
-                  setSelectedEdgeId(edge.id);
-                  setNodes((current) => current.map((node) => ({ ...node, selected: false })));
-                  setMenu(null);
-                  setNodeMenu(null);
-                  setEdgeMenu(null);
-                }}
-                onContextMenu={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  setSelectedEdgeId(edge.id);
-                  setEdgeMenu({ edgeId: edge.id, screenX: event.clientX, screenY: event.clientY });
-                  setNodeMenu(null);
-                  setMenu(null);
-                }}
-              />
-            );
-          })}
-          {connectionDrag && (
-            <path
-              className="edge connection-preview"
-              d={previewEdgePath(connectionDrag.from, connectionDrag.to)}
-            />
-          )}
-        </svg>
-      )}
-      {showCompatibilityCanvas && (
-        <section ref={worldRef} className="world" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}>
-          {renderNodes.map((node) => (
-            <GuardedNode key={node.id} label={node.title || NODE_MENU.find((item) => item.type === node.type)?.label || "节点"} nodeId={node.id}>
-              <CanvasNode
-                node={node}
-                isDragging={drag?.id === node.id}
-                highlighted={highlightedNodeId === node.id}
-                allNodes={nodes}
-                selectedNodeIds={selectedNodeIds}
-                marqueeMode={marqueeMode}
-                shiftPressedRef={shiftPressedRef}
-                updateNode={updateNode}
-                selectNode={selectNode}
-                setDrag={setDrag}
-                setResize={setResize}
-                addNode={addNode}
-                connectFromLast={connectFromLast}
-                createOutputNear={createOutputNear}
-                createManyOutputs={createManyOutputs}
-                deleteNode={deleteNode}
-                duplicateNode={duplicateNode}
-                openNodeMenu={(nodeId, event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  selectNode(nodeId);
-                  setNodeMenu({ nodeId, screenX: event.clientX, screenY: event.clientY });
-                  setMenu(null);
-                  setEdgeMenu(null);
-                }}
-                startConnection={startConnection}
-                finishConnection={finishConnection}
-                pushHistory={pushHistory}
-                settings={settings}
-                textApiSettings={textApiSettings}
-                patchTextApiSettings={patchTextApiSettings}
-                openSettings={openSettingsPanel}
-                stylePresetCenter={stylePresetCenter}
-                onOpenStylePresetCenter={() => setShowStylePresetCenter(true)}
-                viewRef={viewRef}
-                assetIndex={assetIndex}
-                openPromptPreview={(payload) => setPromptPreview(payload)}
-                addGenerationJobs={addGenerationJobs}
-                resourceIndex={resourceIndex}
-                importShotsToTimeline={importShotsToTimeline}
-                syncPipelineToLinkedNodes={syncPipelineToLinkedNodes}
-                sendImageToLinkedNode={sendImageToLinkedNode}
-                appendShotsToNearestShotList={appendShotsToNearestShotList}
-                applyResultToNearestShot={applyResultToNearestShot}
-                handleResultShotAction={handleResultShotAction}
-                createPromptNodeFromAsset={createPromptNodeFromAsset}
-                locateResultForShot={locateResultForShot}
-              />
-            </GuardedNode>
-          ))}
-        </section>
-      )}
-      {showCompatibilityCanvas && visibleNodes.length === 0 && (
-        <div className="empty-hint">
-          <div>双击鼠标添加节点</div>
-          <small>{episodes.find((episode) => episode.id === activeEpisodeId)?.name || "当前集"} · Double-click to add a node</small>
-        </div>
-      )}
-      {showCompatibilityCanvas && menu && (
-        <div className="add-menu" style={{ left: menu.screenX, top: menu.screenY }}>
-          {NODE_MENU.map((item) => (
-            <button key={item.type} onClick={() => addNode(item.type, menu.world)}>
-              <span>{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
-      {showCompatibilityCanvas && nodeMenu && (
-        <div className="context-menu" style={{ left: nodeMenu.screenX, top: nodeMenu.screenY }}>
-          <button onClick={() => duplicateNode(nodeMenu.nodeId)}>复制节点</button>
-          {nodes.find((node) => node.id === nodeMenu.nodeId)?.type === "result" && (
-            <button onClick={() => sendResultToSplit(nodeMenu.nodeId)}>送入分镜拆分</button>
-          )}
-          <button className="danger-item" onClick={() => deleteNode(nodeMenu.nodeId)}>删除节点</button>
-        </div>
-      )}
-      {showCompatibilityCanvas && edgeMenu && (
-        <div className="context-menu" style={{ left: edgeMenu.screenX, top: edgeMenu.screenY }}>
-          <button className="danger-item" onClick={() => deleteEdge(edgeMenu.edgeId)}>删除连线</button>
-        </div>
-      )}
+      <LegacyCanvasOverlay
+        show={showCompatibilityCanvas}
+        selectionBox={selectionBox}
+        edgeLayerRef={edgeLayerRef}
+        visibleEdges={visibleEdges}
+        nodeById={nodeById}
+        view={view}
+        selectedEdgeId={selectedEdgeId}
+        selectEdge={(edgeId) => {
+          setSelectedEdgeId(edgeId);
+          setNodes((current) => current.map((node) => ({ ...node, selected: false })));
+          setMenu(null);
+          setNodeMenu(null);
+          setEdgeMenu(null);
+        }}
+        openEdgeMenu={(edgeId, event) => {
+          setSelectedEdgeId(edgeId);
+          setEdgeMenu({ edgeId, screenX: event.clientX, screenY: event.clientY });
+          setNodeMenu(null);
+          setMenu(null);
+        }}
+        connectionDrag={connectionDrag}
+        worldRef={worldRef}
+        renderNodes={renderNodes}
+        guardNode={GuardedNode}
+        nodeComponent={CanvasNode}
+        nodeMenuItems={NODE_MENU}
+        drag={drag}
+        highlightedNodeId={highlightedNodeId}
+        nodes={nodes}
+        selectedNodeIds={selectedNodeIds}
+        marqueeMode={marqueeMode}
+        shiftPressedRef={shiftPressedRef}
+        updateNode={updateNode}
+        selectNode={selectNode}
+        setDrag={setDrag}
+        setResize={setResize}
+        addNode={addNode}
+        connectFromLast={connectFromLast}
+        createOutputNear={createOutputNear}
+        createManyOutputs={createManyOutputs}
+        deleteNode={deleteNode}
+        duplicateNode={duplicateNode}
+        openNodeMenu={(nodeId, event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          selectNode(nodeId);
+          setNodeMenu({ nodeId, screenX: event.clientX, screenY: event.clientY });
+          setMenu(null);
+          setEdgeMenu(null);
+        }}
+        startConnection={startConnection}
+        finishConnection={finishConnection}
+        pushHistory={pushHistory}
+        settings={settings}
+        textApiSettings={textApiSettings}
+        patchTextApiSettings={patchTextApiSettings}
+        openSettings={openSettingsPanel}
+        stylePresetCenter={stylePresetCenter}
+        onOpenStylePresetCenter={() => setShowStylePresetCenter(true)}
+        viewRef={viewRef}
+        assetIndex={assetIndex}
+        openPromptPreview={(payload) => setPromptPreview(payload)}
+        addGenerationJobs={addGenerationJobs}
+        resourceIndex={resourceIndex}
+        importShotsToTimeline={importShotsToTimeline}
+        syncPipelineToLinkedNodes={syncPipelineToLinkedNodes}
+        sendImageToLinkedNode={sendImageToLinkedNode}
+        appendShotsToNearestShotList={appendShotsToNearestShotList}
+        applyResultToNearestShot={applyResultToNearestShot}
+        handleResultShotAction={handleResultShotAction}
+        createPromptNodeFromAsset={createPromptNodeFromAsset}
+        locateResultForShot={locateResultForShot}
+        visibleNodes={visibleNodes}
+        activeEpisodeName={episodes.find((episode) => episode.id === activeEpisodeId)?.name}
+        menu={menu}
+        nodeMenu={nodeMenu}
+        edgeMenu={edgeMenu}
+        sendResultToSplit={sendResultToSplit}
+        deleteEdge={deleteEdge}
+      />
       {showCompatibilityCanvas && (
         <LegacyCanvasBanner
           onReturnToStudio={() => {

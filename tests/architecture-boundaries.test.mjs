@@ -85,8 +85,10 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
 
   assert.match(content, /showCompatibilityCanvas/);
   assert.match(legacyCanvasShell, /compat-canvas-banner/);
+  assert.match(legacyCanvasShell, /export function LegacyCanvasOverlay/);
+  assert.match(legacyCanvasShell, /<svg className="edge-layer"/);
   assert.match(content, /onDoubleClick=\{showCompatibilityCanvas \? handleStageDoubleClick : undefined\}/);
-  assert.match(content, /\{showCompatibilityCanvas && \(\s*<svg className="edge-layer"/s);
+  assert.match(content, /<LegacyCanvasOverlay/);
   assert.match(content, /\{showCompatibilityCanvas && performanceSettings\.showMinimap && \(/);
   assert.match(content, /function openProductionStudio/);
   assert.match(content, /function openProductionStudioView/);
@@ -311,6 +313,7 @@ test("main app delegates queue and project path state to app hooks", () => {
   assert.doesNotMatch(content, /Production OS 已加入视频队列/);
   assert.doesNotMatch(content, /businessModel=\{commercialProject\}/);
   assert.doesNotMatch(content, /<div className="compat-canvas-banner">/);
+  assert.doesNotMatch(content, /<svg className="edge-layer"/);
   assert.doesNotMatch(content, /function buildDirectorImageSuggestion/);
   assert.doesNotMatch(content, /function buildDirectorVideoSuggestion/);
   assert.doesNotMatch(content, /function suggestCameraMove/);
@@ -328,7 +331,7 @@ test("main app stays under the current responsibility budget", () => {
   const content = readFileSync(join(root, "src", "main.jsx"), "utf8");
   const lines = content.split(/\r?\n/).length;
 
-  assert.ok(lines <= 11900, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
+  assert.ok(lines <= 11820, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
 });
 
 test("app action modules stay free of React and Tauri runtime imports", () => {
