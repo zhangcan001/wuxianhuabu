@@ -133,6 +133,32 @@ Video Pipeline -> Text Pipeline
 
 子系统之间不互相直接调用，只通过编排系统交换命令和事件。
 
+## 前端责任边界
+
+`src/main.jsx` 是工作区组合层，只负责持有顶层状态、接线 app actions、渲染当前工作区壳。新功能不应直接把业务流程塞回主入口。
+
+当前约定：
+
+- `src/app/*-actions.js`：可测试的应用动作，负责把 UI 请求转换为项目命令、队列提交或运行时端口调用。
+- `src/app/*-runtime.js`：运行时适配和动态加载，例如全景/Three.js 能力。
+- `src/app/use-*.js`：顶层状态副作用和事件监听。
+- `src/app/legacy-canvas-*.jsx`：兼容画布 UI 边界，只在用户打开旧画布时加载。
+- `src/app/canvas-node.jsx`：兼容画布节点壳，节点内部仍通过懒加载拆到 basic/heavy/canvas-heavy 节点文件。
+- `src/product/studio/*`：生产工作台 UI。它可以调用 app actions，但不应直接依赖旧画布 adapter。
+- `src/domain/*` 与 `src/core/*`：纯业务规则，不能依赖 React、Tauri、DOM 或浏览器存储。
+
+主入口预算：
+
+- `src/main.jsx` 当前必须低于架构测试中的行数预算。
+- 每次把职责移出主入口后，都应同步收紧预算。
+- 新增生产链路能力时，优先落在 `src/app` action/hook/runtime 或 `src/domain`，再由主入口接线。
+
+兼容画布策略：
+
+- 生产工作台是默认入口，兼容画布只用于迁移、高级检查和旧节点数据排查。
+- `LegacyCanvasOverlay` 必须保持懒加载，避免旧画布节点树进入首屏主 chunk。
+- 新的生产功能不应依赖兼容画布节点作为唯一数据来源。
+
 ## 命令
 
 命令表示“请求系统做一件事”。
