@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Local caches and logs
+.vite/
+.turbo/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+
+# Local diagnostics and generated scratch assets
+extracted/
+frontend_strings.txt
+pat_snippets.txt
+snippets.txt
+reconstruction_source.md
+report.md
+*-check.png
