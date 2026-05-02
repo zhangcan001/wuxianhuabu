@@ -101,6 +101,7 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
   assert.match(panelPropBuilders, /activeViewRequest:\s*input\.studioViewRequest/);
   assert.match(content, /workspace-navigation\.js/);
   assert.match(content, /legacy-canvas-shell\.jsx/);
+  assert.match(content, /panorama-runtime\.js/);
   assert.match(workspaceNavigation, /openAdvancedCanvasNavigation/);
   assert.match(workspaceNavigation, /openProductionStudioViewNavigation/);
   assert.match(workspaceNavigation, /openSettingsPanelNavigation/);
@@ -112,6 +113,7 @@ test("main app keeps legacy canvas behind compatibility mode", () => {
   assert.doesNotMatch(content, /setShowDashboard\(false\);\s*setShowHealth\(false\);/);
   assert.doesNotMatch(content, /setSettingsFocus\(focus\);\s*refreshGlobalApiConfigs\(\);/);
   assert.doesNotMatch(content, /function CanvasNode/);
+  assert.doesNotMatch(content, /let threeModulePromise/);
 });
 
 test("timeline panel is a real split panel and no longer re-exports production-panels", () => {
@@ -336,7 +338,7 @@ test("main app stays under the current responsibility budget", () => {
   const content = readFileSync(join(root, "src", "main.jsx"), "utf8");
   const lines = content.split(/\r?\n/).length;
 
-  assert.ok(lines <= 11620, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
+  assert.ok(lines <= 11520, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
 });
 
 test("app action modules stay free of React and Tauri runtime imports", () => {
@@ -374,6 +376,7 @@ test("new app orchestration modules own extracted main responsibilities", () => 
     "panel-prop-builders.js",
     "legacy-canvas-shell.jsx",
     "canvas-node.jsx",
+    "panorama-runtime.js",
     "health-fix-prompts.js",
     "media-provider-runtime.js",
   ];
