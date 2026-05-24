@@ -266,6 +266,25 @@ test("main app delegates queue and project path state to app hooks", () => {
   assert.doesNotMatch(content, /function normalizeApiWorkspaceLibrary/);
   assert.doesNotMatch(content, /function loadApiWorkspaceLibrary/);
   assert.doesNotMatch(content, /API_WORKSPACE_LIBRARY_KEY/);
+  assert.doesNotMatch(content, /function loadApiKeyVault/);
+  assert.doesNotMatch(content, /function rememberApiKey\b/);
+  assert.doesNotMatch(content, /function forgetApiKey\b/);
+  assert.doesNotMatch(content, /function applyApiKeyVaultToImageSettings/);
+  assert.doesNotMatch(content, /function applyApiKeyVaultToNovelSettings/);
+  assert.doesNotMatch(content, /function summarizeHudTextSettings/);
+  assert.doesNotMatch(content, /function summarizeHudMediaSettings/);
+  assert.doesNotMatch(content, /function providerLabel/);
+  assert.doesNotMatch(content, /function makeCanvas\b/);
+  assert.doesNotMatch(content, /function makeGeneratedImage/);
+  assert.doesNotMatch(content, /function makeStoryboardImage/);
+  assert.doesNotMatch(content, /function makeDirectorImage/);
+  assert.doesNotMatch(content, /function makeDirectorDepthImage/);
+  assert.doesNotMatch(content, /function makeDirectorPoseImage/);
+  assert.doesNotMatch(content, /function projectDirectorPoint/);
+  assert.doesNotMatch(content, /function normalizeMannequin/);
+  assert.doesNotMatch(content, /function normalizeDirectorCamera/);
+  assert.doesNotMatch(content, /const POSE_PRESETS/);
+  assert.doesNotMatch(content, /const DEFAULT_MANNEQUINS/);
   assert.doesNotMatch(content, /function safeFileName/);
   assert.doesNotMatch(content, /function shortPath/);
   assert.doesNotMatch(content, /function screenToWorld/);
@@ -344,7 +363,7 @@ test("main app stays under the current responsibility budget", () => {
   const content = readFileSync(join(root, "src", "main.jsx"), "utf8");
   const lines = content.split(/\r?\n/).length;
 
-  assert.ok(lines <= 11500, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
+  assert.ok(lines <= 11200, `src/main.jsx has ${lines} lines; extract more app actions before adding new responsibilities`);
 });
 
 test("app action modules stay free of React and Tauri runtime imports", () => {
