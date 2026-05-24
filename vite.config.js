@@ -1,6 +1,24 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+const VENDOR_CHUNK_PATTERNS = [
+  [/[\\/]three[\\/]/, "three"],
+  [/[\\/]@tauri-apps[\\/]/, "tauri-vendor"],
+  [/[\\/]react[\\/]/, "react-vendor"],
+];
+
+const SOURCE_CHUNK_PATTERNS = [
+  [/[\\/]src[\\/]lazy-panels\.jsx$/, "workspace-panels"],
+  [/[\\/]src[\\/]management-panels\.jsx$/, "management-panels"],
+  [/[\\/]src[\\/]heavy-nodes\.jsx$/, "heavy-nodes"],
+  [/[\\/]src[\\/]canvas-heavy-nodes\.jsx$/, "canvas-heavy-nodes"],
+  [/[\\/]src[\\/]basic-nodes\.jsx$/, "basic-nodes"],
+  [/[\\/]src[\\/]utility-panels\.jsx$/, "utility-panels"],
+  [/[\\/]src[\\/]minimap-panel\.jsx$/, "minimap-panel"],
+  [/[\\/]src[\\/]app[\\/]novel-factory-config\.js$/, "novel-factory-config"],
+  [/[\\/]src[\\/]novel-factory-default-templates\.js$/, "novel-factory-templates"],
+];
+
 export default defineConfig({
   plugins: [react()],
   define: {
@@ -24,18 +42,15 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            if (id.includes("three")) return "three";
-            if (id.includes("@tauri-apps")) return "tauri-vendor";
-            if (id.includes("react")) return "react-vendor";
+            for (const [pattern, name] of VENDOR_CHUNK_PATTERNS) {
+              if (pattern.test(id)) return name;
+            }
             return "vendor";
           }
-          if (id.includes("/src/lazy-panels.jsx")) return "workspace-panels";
-          if (id.includes("/src/management-panels.jsx")) return "management-panels";
-          if (id.includes("/src/heavy-nodes.jsx")) return "heavy-nodes";
-          if (id.includes("/src/canvas-heavy-nodes.jsx")) return "canvas-heavy-nodes";
-          if (id.includes("/src/basic-nodes.jsx")) return "basic-nodes";
-          if (id.includes("/src/utility-panels.jsx")) return "utility-panels";
-          if (id.includes("/src/minimap-panel.jsx")) return "minimap-panel";
+          for (const [pattern, name] of SOURCE_CHUNK_PATTERNS) {
+            if (pattern.test(id)) return name;
+          }
+          return undefined;
         },
       },
     },
