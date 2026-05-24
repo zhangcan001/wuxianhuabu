@@ -234,12 +234,7 @@ import {
   summarizeQueue,
 } from "./project-report-helpers.js";
 import {
-  applyImageApiKeyVault,
-  applyNovelApiKeyVault,
-  forgetApiKeyInVault,
   hasSavedApiKey,
-  loadApiKeyVaultFromStorage,
-  rememberApiKeyInVault,
 } from "./storage-helpers.js";
 import {
   parseProjectContent,
@@ -498,6 +493,18 @@ import {
   resolveVideoJobSettings,
 } from "./app/media-provider-runtime.js";
 import {
+  providerLabel,
+  summarizeHudMediaSettings,
+  summarizeHudTextSettings,
+} from "./app/provider-summary-helpers.js";
+import {
+  applyApiKeyVaultToImageSettings,
+  applyApiKeyVaultToNovelSettings,
+  forgetApiKey,
+  loadApiKeyVault,
+  rememberApiKey,
+} from "./app/api-key-vault-bindings.js";
+import {
   deleteSelectedMediaCacheFilesAction,
   exportMediaCacheCleanupReportAction,
 } from "./app/project-media-cache-actions.js";
@@ -636,7 +643,6 @@ import {
 } from "./app/node-factory.js";
 import {
   API_BASE,
-  API_KEY_VAULT_KEY,
   ASSET_LIBRARY_KEY,
   AUTOPILOT_MAX_ROUNDS,
   DEBUG_TRACE_KEY,
@@ -7623,42 +7629,6 @@ function loadSavedProject() {
   }
 }
 
-function loadApiKeyVault() {
-  return loadApiKeyVaultFromStorage({ storage: localStorage, storageKey: API_KEY_VAULT_KEY, tauriRuntime: isTauriRuntime() });
-}
-
-function rememberApiKey(kind, value) {
-  rememberApiKeyInVault(kind, value, { storage: localStorage, storageKey: API_KEY_VAULT_KEY, tauriRuntime: isTauriRuntime() });
-}
-
-function forgetApiKey(kind) {
-  forgetApiKeyInVault(kind, { storage: localStorage, storageKey: API_KEY_VAULT_KEY, tauriRuntime: isTauriRuntime() });
-}
-
-function applyApiKeyVaultToImageSettings(settings) {
-  return applyImageApiKeyVault(settings, loadApiKeyVault());
-}
-
-function applyApiKeyVaultToNovelSettings(settings) {
-  return applyNovelApiKeyVault(settings, loadApiKeyVault());
-}
-
-function summarizeHudTextSettings(settings = {}) {
-  const mode = settings.factoryMode === "api" ? "API" : "本地";
-  return `${mode} · ${settings.apiProvider || "openai"} · ${settings.apiModel || "未填模型"}`;
-}
-
-function summarizeHudMediaSettings(settings = {}) {
-  const mode = currentProviderMode(settings);
-  if (mode === "comfy") {
-    return `ComfyUI · ${settings.comfyBaseUrl || "未填地址"}`;
-  }
-  if (mode === "custom") {
-    return `HTTP API · ${settings.customModel || settings.customApiKind || "未填模型"}`;
-  }
-  return "本地模拟";
-}
-
 function loadNovelApiSettings() {
   try {
     const raw = localStorage.getItem(NOVEL_API_SETTINGS_KEY);
@@ -7810,13 +7780,6 @@ function inferNextNodeId(nodes) {
     return match ? Math.max(max, Number(match[1])) : max;
   }, 0);
   return maxId + 1;
-}
-
-function providerLabel(settings) {
-  const mode = currentProviderMode(settings);
-  if (mode === "custom") return settings.customModel || "自定义 API";
-  if (mode === "comfy") return "ComfyUI";
-  return "Nano Banana 2";
 }
 
   async function runImageGeneration(settings, prompt) {
