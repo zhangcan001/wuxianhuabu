@@ -7,6 +7,11 @@ import {
 
 export function AssetLibraryPanel({ assets = [], resources = [], actions = {}, running = false, runningAction = "", taskIndex = {}, uploadAssetImage }) {
   const [sourceModes, setSourceModes] = useState({});
+  const [showAllAssets, setShowAllAssets] = useState(false);
+  const missingImageCount = assets.filter((asset) => !asset.hasImage).length;
+  const unreferencedCount = assets.filter((asset) => Number(asset.referenceCount || 0) === 0 && !asset.assetRefs?.length).length;
+  const lockedCount = assets.filter((asset) => asset.hasImage && String(asset.visualLock || asset.prompt || asset.description || "").trim()).length;
+  const visibleAssets = showAllAssets ? assets : assets.slice(0, 240);
   return (
     <section className="workbench-panel">
       <div className="panel-title">
@@ -15,8 +20,16 @@ export function AssetLibraryPanel({ assets = [], resources = [], actions = {}, r
           <button type="button" disabled={!assets.length} onClick={actions.exportAssetsAndStoryboard}>导出资产+分镜</button>
           <button type="button" onClick={actions.importResources}>导入资源</button>
         </div>
-        <span>{assets.length || resources.length ? `${assets.length} 个角色 / 场景 / 道具资产 · ${resources.length} 个参考资源` : "生成文本方案或导入资源后会出现资产库"}</span>
+        <span>{assets.length || resources.length ? `${assets.length} 个资产 · 缺定妆 ${missingImageCount} · 未引用 ${unreferencedCount} · 参考资源 ${resources.length}` : "生成文本方案或导入资源后会出现资产库"}</span>
       </div>
+      {assets.length ? (
+        <div className="asset-health-strip studio-asset-health">
+          <span className={missingImageCount ? "bad" : "good"}>缺定妆 {missingImageCount}</span>
+          <span className={unreferencedCount ? "bad" : "good"}>未引用 {unreferencedCount}</span>
+          <span className={lockedCount >= assets.length ? "good" : "warn"}>视觉锁定 {lockedCount}/{assets.length}</span>
+          <button type="button" onClick={actions.repairAssetConsistency} disabled={running || !assets.length}>一键检查一致性</button>
+        </div>
+      ) : null}
       {resources.length ? (
         <section className="studio-resource-section">
           <div className="panel-title">
@@ -58,7 +71,13 @@ export function AssetLibraryPanel({ assets = [], resources = [], actions = {}, r
       ) : null}
       {assets.length ? (
         <div className="asset-table">
-          {assets.map((asset) => {
+          {!showAllAssets && assets.length > visibleAssets.length ? (
+            <div className="large-list-notice">
+              <span>性能模式：当前显示前 {visibleAssets.length} / {assets.length} 个资产</span>
+              <button type="button" onClick={() => setShowAllAssets(true)}>显示全部</button>
+            </div>
+          ) : null}
+          {visibleAssets.map((asset) => {
             const assetKey = asset.id || asset.token || asset.name;
             const uploading = runningAction === `asset-upload-${assetKey}`;
             const taskStatus = taskIndex.assets?.[asset.id] || taskIndex.assets?.[asset.token] || taskIndex.assets?.[asset.name] || null;
@@ -87,6 +106,11 @@ export function AssetLibraryPanel({ assets = [], resources = [], actions = {}, r
                 </div>
                 <div className="asset-list-body">
                   <p>{asset.prompt || asset.visualLock || asset.description || "暂无视觉锁定"}</p>
+                  <div className="asset-reference-meta">
+                    <span className={asset.hasImage ? "ok" : "warn"}>{asset.hasImage ? "定妆图已锁定" : "缺少定妆图"}</span>
+                    <span className={Number(asset.referenceCount || 0) > 0 ? "ok" : "warn"}>引用 {asset.referenceCount || 0}</span>
+                    {asset.token ? <code>{asset.token}</code> : null}
+                  </div>
                   <AssetCandidateStrip asset={asset} actions={actions} />
                 </div>
                 <div className="asset-actions">

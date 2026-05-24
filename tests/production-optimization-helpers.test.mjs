@@ -50,6 +50,9 @@ test("queue diagnostics classifies failures and suggests actions", () => {
   assert.equal(board.failed, 1);
   assert.equal(board.failureReasons.quota, 1);
   assert.equal(board.suggestedAction, "switchProvider");
+  assert.equal(board.failureDetails[0].label, "额度不足");
+  assert.equal(board.failureDetails[0].actionLabel, "切换 Provider");
+  assert.equal(board.failureDetails[0].examples[0].title, "S01");
 });
 
 test("enhanced delivery gate reports render blockers and warnings", () => {

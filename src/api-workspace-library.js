@@ -8,6 +8,35 @@ export function normalizeApiWorkspaceLibrary(raw) {
   };
 }
 
+export function createApiWorkspaceEntry({
+  id = "",
+  name = "",
+  textSettings = {},
+  mediaSettings = {},
+  now = () => new Date().toISOString(),
+} = {}) {
+  return {
+    id: String(id || ""),
+    name: String(name || "").trim() || "新工作区",
+    updatedAt: typeof now === "function" ? now() : new Date().toISOString(),
+    textSettings: textSettings && typeof textSettings === "object" ? textSettings : {},
+    mediaSettings: mediaSettings && typeof mediaSettings === "object" ? mediaSettings : {},
+  };
+}
+
+export function addApiWorkspaceToLibrary(library, workspace) {
+  const normalized = normalizeApiWorkspaceLibrary(library);
+  const entry = createApiWorkspaceEntry(workspace);
+  if (!entry.id) {
+    return normalized;
+  }
+  return {
+    ...normalized,
+    activeWorkspaceId: entry.id,
+    workspaces: [entry, ...normalized.workspaces.filter((item) => item?.id !== entry.id)],
+  };
+}
+
 export function loadApiWorkspaceLibrary({
   storage = globalThis.localStorage,
   storageKey = API_WORKSPACE_LIBRARY_KEY,

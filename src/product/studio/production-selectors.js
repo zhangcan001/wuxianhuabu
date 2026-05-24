@@ -288,6 +288,12 @@ export function buildBusinessOptimizationBoard(input = {}) {
       nextSteps: ["通过交付检查", "选择 MP4 或工程包", "归档素材清单和审片记录"],
       estimate: { tasks: exportReady ? 1 : missingVideos + missingImages, minutes: exportReady ? 3 : Math.max(5, missingVideos * 4 + missingImages * 2), costLevel: exportReady ? "低" : "中" },
     }),
+    boardItem("desktopRelease", "桌面发布护栏", true, "发布前检查、版本同步和 NSIS 安装包已进入固定流程", "运行发布检查", "release", {
+      progress: 100,
+      maturity: "闭环",
+      nextSteps: ["运行 test:release", "确认安装包配置", "正式发布前接入签名和自动更新"],
+      estimate: { tasks: 0, minutes: 0, costLevel: "低" },
+    }),
   ];
   const open = items.filter((item) => item.status !== "done").length;
   return {

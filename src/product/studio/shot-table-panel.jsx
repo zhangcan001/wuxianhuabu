@@ -10,6 +10,10 @@ export function ShotTablePanel({ shots = [], actions = {}, running = false, runn
   const [imageModes, setImageModes] = useState({});
   const [videoModes, setVideoModes] = useState({});
   const [promptDrafts, setPromptDrafts] = useState({});
+  const [showAllShots, setShowAllShots] = useState(false);
+  const imageReadyCount = shots.filter((shot) => String(shot.imagePrompt || "").trim()).length;
+  const videoReadyCount = shots.filter((shot) => String(shot.videoPrompt || "").trim()).length;
+  const visibleShots = showAllShots ? shots : shots.slice(0, 240);
   const promptValue = (shot, key) => promptDrafts[shot.id]?.[key] ?? shot[key] ?? "";
   const updatePromptDraft = (shot, key, value) => setPromptDrafts((current) => ({
     ...current,
@@ -34,13 +38,25 @@ export function ShotTablePanel({ shots = [], actions = {}, running = false, runn
       <div className="panel-title">
         <div className="panel-title-row">
           <strong>镜头表</strong>
-          <button type="button" disabled={!shots.length} onClick={actions.exportAssetsAndStoryboard}>导出资产+分镜</button>
+          <div className="shot-batch-actions">
+            <button type="button" disabled={running || !imageReadyCount} onClick={actions.generateImages}>批量生图</button>
+            <button type="button" disabled={running || !videoReadyCount} onClick={actions.generateVideos}>批量生视频</button>
+            <button type="button" disabled={!shots.length} onClick={actions.openQueue}>失败队列</button>
+            <button type="button" disabled={running || !shots.length} onClick={actions.runReview}>审片</button>
+            <button type="button" disabled={!shots.length} onClick={actions.exportAssetsAndStoryboard}>导出资产+分镜</button>
+          </div>
         </div>
-        <span>{shots.length ? `${shots.length} 个镜头，检查图片和视频生产状态` : "生成文本方案后会出现镜头表"}</span>
+        <span>{shots.length ? `${shots.length} 个镜头，${imageReadyCount} 条可生图，${videoReadyCount} 条可生视频` : "生成文本方案后会出现镜头表"}</span>
       </div>
       {shots.length ? (
         <div className="production-shot-table">
-          {shots.map((shot) => {
+          {!showAllShots && shots.length > visibleShots.length ? (
+            <div className="large-list-notice">
+              <span>性能模式：当前显示前 {visibleShots.length} / {shots.length} 个镜头</span>
+              <button type="button" onClick={() => setShowAllShots(true)}>显示全部</button>
+            </div>
+          ) : null}
+          {visibleShots.map((shot) => {
             const imageUploading = runningAction === `shot-image-upload-${shot.id}`;
             const videoUploading = runningAction === `shot-video-upload-${shot.id}`;
             const rowBusy = imageUploading || videoUploading;

@@ -397,20 +397,33 @@ test("release and migration guardrails stay wired", () => {
   const releaseSafety = readFileSync(join(root, "scripts", "release-safety-check.mjs"), "utf8");
   const bundleBudget = readFileSync(join(root, "scripts", "bundle-budget-check.mjs"), "utf8");
   const smokePreview = readFileSync(join(root, "scripts", "run-studio-smoke-preview.mjs"), "utf8");
+  const desktopSmoke = readFileSync(join(root, "scripts", "desktop-release-smoke.mjs"), "utf8");
   const optimizationHelpers = readFileSync(join(root, "src", "domain", "production-optimization-helpers.js"), "utf8");
   const docs = readFileSync(join(root, "docs", "optimization-checklist.md"), "utf8");
+  const tauriConfig = JSON.parse(readFileSync(join(root, "src-tauri", "tauri.conf.json"), "utf8"));
 
   assert.match(packageJson.scripts["test:e2e:studio:preview"], /run-studio-smoke-preview\.mjs/);
   assert.match(packageJson.scripts["test:release"], /bundle:check/);
   assert.match(packageJson.scripts["test:release"], /test:release-safety/);
+  assert.match(packageJson.scripts["release:build"], /test:release/);
+  assert.match(packageJson.scripts["release:build"], /tauri build/);
+  assert.match(packageJson.scripts["test:desktop-smoke"], /desktop-release-smoke\.mjs/);
   assert.match(releaseSafety, /test:e2e:studio:preview/);
+  assert.match(releaseSafety, /desktop-release-smoke\.mjs/);
+  assert.match(releaseSafety, /versions: "synced"/);
+  assert.match(releaseSafety, /nsis: "configured"/);
   assert.match(bundleBudget, /legacy-canvas-shell/);
   assert.match(bundleBudget, /project-studio/);
   assert.match(bundleBudget, /workspace-panels/);
   assert.match(smokePreview, /--strictPort/);
+  assert.match(desktopSmoke, /wuxianhuabu\.exe/);
+  assert.match(desktopSmoke, /x64-setup\.exe/);
   assert.match(optimizationHelpers, /FRONTEND_OPTIMIZATION_CHECKLIST/);
   assert.match(optimizationHelpers, /auditMediaReferenceBoundaries/);
-  assert.match(docs, /12 项优化/);
+  assert.deepEqual(tauriConfig.bundle.targets, ["nsis"]);
+  assert.equal(tauriConfig.bundle.windows.nsis.installMode, "currentUser");
+  assert.equal(tauriConfig.bundle.windows.nsis.installerIcon, "icons/icon.ico");
+  assert.match(docs, /21 项优化/);
 });
 
 function listSourceFiles(dir) {

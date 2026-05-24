@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import {
+  buildQueueFailureDetails,
+} from "./domain/queue-diagnostics.js";
 
 function getTimelineDeliveryState(clip) {
   const hasMedia = Boolean(String(clip?.mediaUrl || "").trim());
@@ -1581,6 +1584,7 @@ export function ProjectDashboardPanel({ summary, workflowFocus, activeEpisodeId,
 
 export function GenerationQueuePanel({ jobs, running, onRun, onStop, onClear, onClearFinished, onRetryFailed, onRetryFailedShots, onRetryAllExports, onRetryFailedExports, onRetryJob, onRemoveJob, onReprioritizeJob, onLocateJob, onRecoverTimelineGaps, onOpenTimeline, activeEpisodeName, timelineGapCount = 0, onClose, queuePriorityOptions, queueStatusLabel, queueKindLabel, compareQueueJobs, shortTitle }) {
   const [filter, setFilter] = useState("全部");
+  const [showAllJobs, setShowAllJobs] = useState(false);
   const counts = jobs.reduce((acc, job) => {
     acc[job.status] = (acc[job.status] || 0) + 1;
     return acc;
@@ -1588,7 +1592,10 @@ export function GenerationQueuePanel({ jobs, running, onRun, onStop, onClear, on
   const exportJobs = jobs.filter((job) => job.kind === "exportVideo");
   const failedShotJobs = jobs.filter((job) => job.status === "failed" && job.kind !== "exportVideo");
   const failedExportCount = exportJobs.filter((job) => job.status === "failed").length;
+  const failureDetails = useMemo(() => buildQueueFailureDetails(jobs.filter((job) => job.status === "failed")), [jobs]);
   const filteredJobs = filter === "全部" ? jobs : jobs.filter((job) => queueStatusLabel(job.status) === filter || job.status === filter);
+  const sortedJobs = filteredJobs.slice().sort(compareQueueJobs);
+  const visibleJobs = showAllJobs ? sortedJobs : sortedJobs.slice(0, 400);
   return createPortal((
     <aside className="queue-panel">
       <header>
@@ -1642,12 +1649,32 @@ export function GenerationQueuePanel({ jobs, running, onRun, onStop, onClear, on
               ))}
             </div>
           ) : null}
+          {failureDetails.length ? (
+            <div className="queue-failure-detail-grid">
+              {failureDetails.map((item) => (
+                <article key={item.reason} className="queue-failure-detail-card">
+                  <div>
+                    <strong>{item.label}</strong>
+                    <span>{item.count} 个任务 · {item.actionLabel}</span>
+                  </div>
+                  <p>{item.detail}</p>
+                  {item.examples.map((example) => (
+                    <small key={example.id || `${item.reason}-${example.title}`}>{example.title} · {shortTitle(example.message)}</small>
+                  ))}
+                </article>
+              ))}
+            </div>
+          ) : null}
         </section>
       ) : null}
       <div className="queue-list">
-        {filteredJobs.length ? filteredJobs
-          .slice()
-          .sort(compareQueueJobs)
+        {!showAllJobs && sortedJobs.length > visibleJobs.length ? (
+          <div className="large-list-notice">
+            <span>性能模式：当前显示前 {visibleJobs.length} / {sortedJobs.length} 个任务</span>
+            <button type="button" onClick={() => setShowAllJobs(true)}>显示全部</button>
+          </div>
+        ) : null}
+        {visibleJobs.length ? visibleJobs
           .map((job) => {
             const progressValue = typeof job.progress === "number" ? Math.max(0, Math.min(100, job.progress)) : null;
             return (
@@ -1687,6 +1714,7 @@ export function GenerationQueuePanel({ jobs, running, onRun, onStop, onClear, on
 export function TimelinePanel({ episode, timeline, availableShots, focusClipId, onImportShots, onPatchClip, onPatchClips, onMoveClip, onDuplicateClip, onSortClips, onRemoveClip, onLocateShot, onGenerateClip, onSyncClip, onSyncClips, onPatchShotFromClip, onPatchShotsFromClips, onPrepareClips, getClipStatus, onExport, onClose, totalDurationSeconds }) {
   const [selectedId, setSelectedId] = useState(timeline.clips[0]?.id || "");
   const [filter, setFilter] = useState("全部");
+  const [showAllClips, setShowAllClips] = useState(false);
   const [lastPrepareSummary, setLastPrepareSummary] = useState(null);
   const [lastBackfillSummary, setLastBackfillSummary] = useState(null);
   const clipStats = useMemo(() => {
@@ -1712,6 +1740,7 @@ export function TimelinePanel({ episode, timeline, availableShots, focusClipId, 
     if (filter === "全部") return timeline.clips;
     return timeline.clips.filter((clip) => getTimelineDeliveryState(clip) === filter);
   }, [filter, timeline.clips]);
+  const visibleClips = showAllClips ? filteredClips : filteredClips.slice(0, 300);
   const selected = filteredClips.find((clip) => clip.id === selectedId)
     || timeline.clips.find((clip) => clip.id === selectedId)
     || filteredClips[0]
@@ -1942,7 +1971,13 @@ export function TimelinePanel({ episode, timeline, availableShots, focusClipId, 
       </div>
       <div className="timeline-body">
         <section className="timeline-strip">
-          {filteredClips.length ? filteredClips.map((clip) => (
+          {!showAllClips && filteredClips.length > visibleClips.length ? (
+            <div className="large-list-notice">
+              <span>性能模式：当前显示前 {visibleClips.length} / {filteredClips.length} 个片段</span>
+              <button type="button" onClick={() => setShowAllClips(true)}>显示全部</button>
+            </div>
+          ) : null}
+          {visibleClips.length ? visibleClips.map((clip) => (
             <button key={clip.id} className={clip.id === selected?.id ? "active" : ""} onClick={() => setSelectedId(clip.id)}>
               <strong>{timeline.clips.findIndex((item) => item.id === clip.id) + 1}. {clip.title}</strong>
               <span>{clip.scene || "未填场景"}</span>

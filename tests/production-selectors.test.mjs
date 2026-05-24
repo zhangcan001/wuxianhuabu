@@ -98,7 +98,7 @@ test("studio media url resolver falls back to asset host for local paths", () =>
   }
 });
 
-test("business optimization board tracks the 20 product improvements", () => {
+test("business optimization board tracks the 21 product improvements", () => {
   const shots = normalizeShotRows([{
     id: "S01",
     imagePrompt: "雨夜车站",
@@ -120,7 +120,7 @@ test("business optimization board tracks the 20 product improvements", () => {
     riskReport: { ok: true },
   });
 
-  assert.equal(board.items.length, 20);
+  assert.equal(board.items.length, 21);
   assert.equal(board.items.find((item) => item.key === "flow").status, "done");
   assert.equal(board.items.find((item) => item.key === "failureRecovery").status, "blocked");
   assert.equal(board.items.find((item) => item.key === "failureRecovery").severity, "critical");
@@ -131,5 +131,6 @@ test("business optimization board tracks the 20 product improvements", () => {
   assert.equal(board.deliveryPreflight.ok, true);
   assert.equal(board.syncStatus.ok, true);
   assert.equal(board.topItems.some((item) => item.key === "failureRecovery"), true);
+  assert.equal(board.items.find((item) => item.key === "desktopRelease").status, "done");
   assert.equal(board.score > 50, true);
 });

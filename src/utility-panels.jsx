@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  addApiWorkspaceToLibrary,
+  createApiWorkspaceEntry,
   loadApiWorkspaceLibrary,
   normalizeApiWorkspaceLibrary,
   saveApiWorkspaceLibrary,
@@ -1300,19 +1302,14 @@ export function SettingsPanel({ settings, setSettings, textApiSettings, patchTex
   function saveCurrentWorkspaceAsNew() {
     const name = window.prompt("请输入整套工作配置名称", `${textProviderPreset.label || "文本"} + ${settings.customModel || "图片视频"}`);
     if (!name || !name.trim()) return;
-    const entry = {
+    const entry = createApiWorkspaceEntry({
       id: createApiProfileId("workspace"),
       name: name.trim(),
-      updatedAt: new Date().toISOString(),
       textSettings: buildTextApiProfileSnapshot(textApiSettings || {}),
       mediaSettings: buildMediaApiProfileSnapshot(settings || {}),
-    };
-    updateApiWorkspaceLibrary((current) => ({
-      ...current,
-      activeWorkspaceId: entry.id,
-      workspaces: [entry, ...current.workspaces],
-    }));
-    setMessage(`已保存整套工作配置：${entry.name}`);
+    });
+    updateApiWorkspaceLibrary((current) => addApiWorkspaceToLibrary(current, entry));
+    setMessage(`已创建新工作区：${entry.name}`);
   }
 
   function overwriteActiveWorkspace() {
@@ -1800,7 +1797,7 @@ export function SettingsPanel({ settings, setSettings, textApiSettings, patchTex
               </div>
             )}
             <div className="quick-actions">
-              <button onClick={saveCurrentWorkspaceAsNew}>另存为整套配置</button>
+              <button onClick={saveCurrentWorkspaceAsNew}>新建工作区</button>
               <button onClick={overwriteActiveWorkspace}>{activeWorkspace ? "覆盖当前整套配置" : "保存为当前整套配置"}</button>
               <button onClick={renameActiveWorkspace} disabled={!activeWorkspace}>重命名</button>
               <button onClick={exportWorkspace}>导出 JSON</button>

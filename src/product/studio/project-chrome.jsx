@@ -23,10 +23,17 @@ const advancedActions = [
 ];
 
 export function ProjectTopbar({ title = "", episodeTitle = "", running = false, actions = {} }) {
+  const channel = import.meta.env.DEV ? "开发版" : import.meta.env.VITE_APP_CHANNEL;
+  const version = import.meta.env.VITE_APP_VERSION;
   return (
     <header className="product-topbar">
       <div className="product-brand">
-        <strong>{title}</strong>
+        <div className="product-brand-title">
+          <strong>{title}</strong>
+          <span className={import.meta.env.DEV ? "app-version-badge is-dev" : "app-version-badge"}>
+            {channel} v{version}
+          </span>
+        </div>
         <span>{episodeTitle} · Production OS</span>
       </div>
       <div className="product-topbar-actions">
@@ -143,6 +150,10 @@ export function ProjectInspector({
               <p key={item.key}><b>{providerLabel(item.key)}</b><br />{item.message}</p>
             ))}
           </div>
+          <div className="provider-health-actions">
+            <button type="button" onClick={actions.openSettings}>打开 API 设置</button>
+            <button type="button" onClick={actions.runSystemSelfCheck}>重新体检</button>
+          </div>
         </section>
       ) : null}
 
@@ -156,6 +167,15 @@ export function ProjectInspector({
             <div><strong>{queueOperationsBoard.running || 0}</strong><span>运行中</span></div>
             <div><strong>{queueOperationsBoard.failed || 0}</strong><span>失败</span></div>
           </div>
+          {queueOperationsBoard.failureDetails?.length ? (
+            <div className="queue-failure-summary">
+              {queueOperationsBoard.failureDetails.slice(0, 3).map((item) => (
+                <p key={item.reason}>
+                  <b>{item.label} · {item.count}</b><br />{item.detail}
+                </p>
+              ))}
+            </div>
+          ) : null}
           {queueOperationsBoard.failed ? <button type="button" onClick={actions.openQueue}>处理失败队列</button> : null}
         </section>
       ) : null}

@@ -1,0 +1,48 @@
+{
+  "kind": "workspace",
+  "version": 1,
+  "exportedAt": "2026-05-06T00:00:00.000Z",
+  "workspace": {
+    "id": "workspace-new-project-20260506",
+    "name": "新项目工作区",
+    "updatedAt": "2026-05-06T00:00:00.000Z",
+    "textSettings": {
+      "factoryMode": "local",
+      "apiProvider": "openai",
+      "apiBaseUrl": "",
+      "apiUrl": "",
+      "apiKey": "",
+      "apiKeySaved": false,
+      "apiKeyClear": false,
+      "authType": "bearer",
+      "headersJson": "",
+      "apiModel": "",
+      "bodyTemplate": "",
+      "responsePath": "",
+      "schema": ""
+    },
+    "mediaSettings": {
+      "providerMode": "mock",
+      "customApiUrl": "",
+      "customApiKey": "",
+      "customApiKeySaved": false,
+      "customApiKeyClear": false,
+      "customAuthType": "bearer",
+      "customHeadersJson": "",
+      "customModel": "",
+      "customApiKind": "direct-image",
+      "customResultMode": "auto",
+      "customImagePath": "",
+      "customBodyTemplate": "",
+      "comfyEnabled": false,
+      "comfyBaseUrl": "",
+      "positiveNodeId": "",
+      "workflowJson": "",
+      "comfyImagePositiveNodeId": "",
+      "comfyImageWorkflowJson": "",
+      "comfyVideoPositiveNodeId": "",
+      "comfyVideoWorkflowJson": "",
+      "comfyTimeoutSeconds": ""
+    }
+  }
+}
