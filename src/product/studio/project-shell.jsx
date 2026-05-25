@@ -6,6 +6,7 @@ import {
   ProjectTopbar,
   ProjectWorkflowStepper,
 } from "./project-chrome.jsx";
+import { CommandPalette } from "./command-palette.jsx";
 import {
   AssetLibraryPanel,
 } from "./asset-library-panel.jsx";
@@ -104,6 +105,21 @@ export function ProjectShell({
 }) {
   const [activeView, setActiveView] = useState("overview");
   const [imagePreview, setImagePreview] = useState(null);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  useEffect(() => {
+    function handleKeyDown(event) {
+      const isMod = event.metaKey || event.ctrlKey;
+      if (isMod && !event.shiftKey && !event.altKey && event.key && event.key.toLowerCase() === "k") {
+        const target = event.target;
+        const isEditable = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+        if (isEditable) return;
+        event.preventDefault();
+        setCommandPaletteOpen((value) => !value);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
   useEffect(() => {
     const requestedView = typeof activeViewRequest === "string" ? activeViewRequest : activeViewRequest?.view;
     if (!requestedView) return;
@@ -381,6 +397,12 @@ export function ProjectShell({
         actions={studioActions}
         uploadShotImage={uploadShotImage}
         uploadShotVideo={uploadShotVideo}
+      />
+      <CommandPalette
+        open={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        actions={studioActions}
+        navigateView={(view) => setActiveView(view)}
       />
       {imagePreview && typeof document !== "undefined" ? createPortal(
         <div className="result-lightbox-backdrop" onClick={() => setImagePreview(null)}>

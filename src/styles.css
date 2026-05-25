@@ -10847,6 +10847,111 @@ select:focus {
   position: relative;
 }
 
+/* === Command palette (Cmd/Ctrl+K) === */
+.command-palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  padding-top: 12vh;
+  background: rgba(8, 12, 24, 0.45);
+  backdrop-filter: blur(18px) saturate(160%);
+  animation: command-palette-fade 0.16s ease-out;
+}
+
+.command-palette-panel {
+  width: min(560px, 92vw);
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(15, 20, 32, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px -16px rgba(8, 12, 24, 0.35), 0 6px 22px -10px rgba(8, 12, 24, 0.2);
+  overflow: hidden;
+  animation: command-palette-pop 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+.command-palette-input {
+  margin: 0;
+  padding: 18px 22px;
+  border: none;
+  background: transparent;
+  font-size: 17px;
+  color: rgba(15, 20, 32, 0.9);
+  border-bottom: 1px solid rgba(15, 20, 32, 0.08);
+}
+
+.command-palette-input:focus {
+  outline: none;
+}
+
+.command-palette-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.command-palette-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+
+.command-palette-item strong {
+  font-size: 14px;
+  color: rgba(15, 20, 32, 0.94);
+}
+
+.command-palette-item span {
+  font-size: 12px;
+  color: rgba(15, 20, 32, 0.56);
+}
+
+.command-palette-item.is-active {
+  background: linear-gradient(120deg, rgba(64, 99, 235, 0.18), rgba(112, 73, 219, 0.18));
+  transform: translateY(-1px);
+}
+
+.command-palette-item:active {
+  transform: scale(0.99);
+}
+
+.command-palette-empty {
+  list-style: none;
+  padding: 32px 16px;
+  text-align: center;
+  color: rgba(15, 20, 32, 0.5);
+  font-size: 13px;
+}
+
+.command-palette-footer {
+  display: flex;
+  gap: 16px;
+  padding: 10px 18px;
+  border-top: 1px solid rgba(15, 20, 32, 0.06);
+  background: rgba(247, 248, 252, 0.85);
+  font-size: 11px;
+  color: rgba(15, 20, 32, 0.5);
+}
+
+@keyframes command-palette-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes command-palette-pop {
+  from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* === Sidebar advanced dropdown === */
 .sidebar-group-advanced {
   position: relative;
