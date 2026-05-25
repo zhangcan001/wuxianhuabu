@@ -761,6 +761,7 @@ function App() {
   const [showSimpleFlow, setShowSimpleFlow] = useState(false);
   const [hudCollapsed, setHudCollapsed] = useState(false);
   const [hudDock, setHudDock] = useState("bottom");
+  const [hudVisible, setHudVisible] = useState(false);
   const [promptPreview, setPromptPreview] = useState(null);
   const [showQueue, setShowQueue] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
@@ -7024,15 +7025,43 @@ async function runGenerationQueue() {
             projectMessage,
             studioViewRequest,
             projectStudioActions,
+            episodes,
+            activeEpisodeId,
+            onEpisodeChange: switchEpisode,
+            onCreateEpisode: createEpisode,
+            workspaces: apiWorkspaceLibrary.workspaces || [],
+            activeWorkspaceId: apiWorkspaceLibrary.activeWorkspaceId || "",
+            onWorkspaceChange: applyApiWorkspacePreset,
+            queueCounts: {
+              image: generationQueue.filter((job) => job.kind === "image").length,
+              video: generationQueue.filter((job) => job.kind === "video").length,
+            },
+            onSmartContinue: continueWorkflowFromDashboard,
+            smartContinueHint: workflowNavigator?.nextStage?.label
+              ? `下一步：${workflowNavigator.nextStage.label}`
+              : "按当前生产进度推进下一步",
           })} />
         </Suspense>
       )}
+      <input ref={fileInputRef} hidden type="file" accept="application/json" onChange={importProject} />
+      <input ref={resourceInputRef} hidden type="file" multiple accept="image/*,video/*,.txt,.md,.json,.doc,.docx,.pdf" onChange={importProjectResources} />
+      <button
+        type="button"
+        className={`hud-toggle${hudVisible ? " is-open" : ""}`}
+        onClick={() => setHudVisible((value) => !value)}
+        title={hudVisible ? "收起工具浮条" : "展开工具浮条"}
+        aria-label={hudVisible ? "收起工具浮条" : "展开工具浮条"}
+      >
+        🔧
+      </button>
+      {hudVisible && (
       <div className={`hud ${hudCollapsed ? "collapsed" : ""} ${hudDock === "top" ? "dock-top" : "dock-bottom"}`}>
         <div className="hud-main">
           <strong>火山AI漫剧</strong>
           {!hudCollapsed && <span>{projectSummary.activeEpisode?.name || "当前集"} · {projectSummary.active.nodes} 节点 · {projectSummary.active.shots} 镜头</span>}
           <button onClick={() => setHudCollapsed((value) => !value)}>{hudCollapsed ? "展开" : "收起"}</button>
           <button onClick={() => setHudDock((value) => (value === "bottom" ? "top" : "bottom"))}>{hudDock === "bottom" ? "置顶" : "置底"}</button>
+          <button onClick={() => setHudVisible(false)} title="关闭工具浮条">✕</button>
         </div>
         {!hudCollapsed && (
           <div className="hud-workflow-strip">
@@ -7059,23 +7088,8 @@ async function runGenerationQueue() {
         {!hudCollapsed && (
           <div className="hud-actions">
             <div className="hud-group">
-              <select className="episode-select" value={activeEpisodeId} onChange={(event) => switchEpisode(event.target.value)}>
-                {episodes.map((episode) => <option key={episode.id} value={episode.id}>{episode.name}</option>)}
-              </select>
-              <button onClick={createEpisode}>新建集</button>
-              <button onClick={duplicateActiveEpisode} disabled={!visibleNodes.length}>复制本集</button>
-            </div>
-            <div className="hud-group">
-              <button className="primary" onClick={() => openProductionStudio()}>生产工作台</button>
-              <button onClick={openAdvancedCanvas}>{showCompatibilityCanvas ? "刷新兼容画布" : "兼容画布"}</button>
-              <button onClick={() => setShowSimpleFlow(true)}>侧边生产台</button>
-              <button onClick={() => setShowDashboard(true)}>高级总控台</button>
-              <button onClick={() => setShowPromptFactory(true)}>提示词工厂</button>
-              <button onClick={() => openProductionStudioView("assets", "已打开生产工作台资产库。")}>资产库</button>
               <button onClick={() => setShowQueue(true)}>图片生成队列 {generationQueue.filter((job) => job.kind === "image").length}</button>
               <button onClick={() => setShowQueue(true)}>视频生成队列 {generationQueue.filter((job) => job.kind === "video").length}</button>
-              <button onClick={() => openProductionStudioView("timeline", "已打开生产工作台时间线。")}>视频时间线 {episodeTimeline.clips.length}</button>
-              <button onClick={() => setShowSettings(true)}>API设置</button>
             </div>
             <div className="hud-group">
               <select value={performanceSettings.mode || "auto"} onChange={(event) => setPerformanceSettings(normalizePerformanceSettings({ ...performanceSettings, mode: event.target.value }))}>
@@ -7110,46 +7124,19 @@ async function runGenerationQueue() {
               </div>
             )}
             <div className="hud-group">
-              <select
-                className="workspace-quick-select"
-                value={apiWorkspaceLibrary.activeWorkspaceId || ""}
-                onChange={(event) => applyApiWorkspacePreset(event.target.value)}
-                title="快速切换整套文本+图片/视频工作配置"
-              >
-                <option value="">工作配置 · 当前临时组合</option>
-                {apiWorkspaceLibrary.workspaces.map((workspace) => (
-                  <option key={workspace.id} value={workspace.id}>
-                    {workspace.name} · {workspace.textSettings?.apiModel || workspace.textSettings?.apiProvider || "文本"} / {workspace.mediaSettings?.customModel || workspace.mediaSettings?.providerMode || "媒体"}
-                  </option>
-                ))}
-              </select>
-              {activeHudWorkspace ? (
-                <span className="hud-workspace-pill" title={`${summarizeHudTextSettings(activeHudWorkspace.textSettings || {})}\n${summarizeHudMediaSettings(activeHudWorkspace.mediaSettings || {})}`}>
-                  {activeHudWorkspace.name}
-                </span>
-              ) : (
-                <span className="hud-workspace-pill muted">未绑定工作配置</span>
-              )}
-              <button onClick={() => openSettingsPanel("root")}>管理配置</button>
-            </div>
-            <div className="hud-group">
-              <button onClick={() => openSettingsPanel("image")}>API控制台</button>
               <button onClick={() => resourceInputRef.current?.click()}>导入资源</button>
-              <button onClick={exportProject}>保存工程</button>
-              <button onClick={openProjectFile}>打开工程</button>
+              {isTauriRuntime() && (
+                <select className="recent-select" value="" onChange={(event) => openRecentProject(event.target.value)}>
+                  <option value="">最近工程</option>
+                  {recentProjects.map((path) => <option key={path} value={path}>{shortPath(path)}</option>)}
+                </select>
+              )}
+              <button onClick={clearProject}>清空</button>
             </div>
-            {isTauriRuntime() && (
-              <select className="recent-select" value="" onChange={(event) => openRecentProject(event.target.value)}>
-                <option value="">最近工程</option>
-                {recentProjects.map((path) => <option key={path} value={path}>{shortPath(path)}</option>)}
-              </select>
-            )}
-            <button onClick={clearProject}>清空</button>
           </div>
         )}
-        <input ref={fileInputRef} hidden type="file" accept="application/json" onChange={importProject} />
-        <input ref={resourceInputRef} hidden type="file" multiple accept="image/*,video/*,.txt,.md,.json,.doc,.docx,.pdf" onChange={importProjectResources} />
       </div>
+      )}
       {(projectMessage || autoSaveState || currentProjectPath) && (
         <div className="project-toast">
           {projectMessage || autoSaveState || (currentProjectPath ? `当前工程：${currentProjectPath}` : "")}

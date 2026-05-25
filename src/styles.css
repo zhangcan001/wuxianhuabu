@@ -10665,3 +10665,192 @@ select:focus {
 .onboarding-btn-primary:hover:not(:disabled) {
   box-shadow: 0 10px 26px rgba(124, 140, 255, 0.42);
 }
+
+/* === Topbar contextual segments (episodes / workspace / queue) === */
+.product-topbar-context {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.topbar-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.topbar-episode-select,
+.topbar-workspace-select {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: rgba(226, 232, 240, 0.96);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 6px;
+  outline: none;
+  max-width: 200px;
+}
+
+.topbar-episode-select option,
+.topbar-workspace-select option {
+  background: #0b1220;
+  color: #e2e8f0;
+}
+
+.topbar-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(226, 232, 240, 0.88);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.16s ease;
+}
+
+.topbar-icon-btn:hover {
+  background: rgba(124, 140, 255, 0.18);
+}
+
+.topbar-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.topbar-queue-pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 12px;
+  border-radius: 10px;
+  background: rgba(124, 140, 255, 0.12);
+  border: 1px solid rgba(124, 140, 255, 0.28);
+  color: rgba(226, 232, 240, 0.96);
+  font-size: 11px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.16s ease;
+}
+
+.topbar-queue-pill b {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.topbar-queue-pill .topbar-queue-breakdown {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.topbar-queue-pill:hover {
+  background: rgba(124, 140, 255, 0.22);
+}
+
+.topbar-queue-pill:active {
+  transform: scale(0.97);
+}
+
+.topbar-smart-continue {
+  position: relative;
+}
+
+/* === Sidebar advanced dropdown === */
+.sidebar-group-advanced {
+  position: relative;
+}
+
+.sidebar-advanced-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 12px;
+}
+
+.sidebar-advanced-trigger.is-open {
+  background: rgba(124, 140, 255, 0.18);
+  color: rgba(226, 232, 240, 0.98);
+}
+
+.sidebar-advanced-menu {
+  position: absolute;
+  left: calc(100% + 6px);
+  bottom: 0;
+  min-width: 160px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(11, 18, 32, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(14px);
+  z-index: 40;
+}
+
+.sidebar-advanced-menu button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  background: transparent;
+  border: none;
+  color: rgba(226, 232, 240, 0.92);
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+
+.sidebar-advanced-menu button:hover {
+  background: rgba(124, 140, 255, 0.16);
+}
+
+/* === HUD floating toggle === */
+.hud-toggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(11, 18, 32, 0.86);
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(14px);
+  z-index: 60;
+  transition: transform 0.16s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.hud-toggle:hover {
+  background: rgba(124, 140, 255, 0.24);
+  box-shadow: 0 14px 32px rgba(124, 140, 255, 0.32);
+}
+
+.hud-toggle:active {
+  transform: scale(0.94);
+}
+
+.hud-toggle.is-open {
+  background: rgba(124, 140, 255, 0.32);
+  border-color: rgba(124, 140, 255, 0.55);
+}
+

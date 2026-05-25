@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   executeRiskAction,
   riskActionLabel,
@@ -30,9 +30,28 @@ const advancedActions = [
   ["openDashboard", "总控台"],
 ];
 
-export function ProjectTopbar({ title = "", episodeTitle = "", running = false, actions = {} }) {
+export function ProjectTopbar({
+  title = "",
+  episodeTitle = "",
+  running = false,
+  actions = {},
+  episodes = [],
+  activeEpisodeId = "",
+  onEpisodeChange,
+  onCreateEpisode,
+  workspaces = [],
+  activeWorkspaceId = "",
+  onWorkspaceChange,
+  queueCounts = null,
+  onSmartContinue,
+  smartContinueHint = "",
+}) {
   const channel = import.meta.env.DEV ? "开发版" : import.meta.env.VITE_APP_CHANNEL;
   const version = import.meta.env.VITE_APP_VERSION;
+  const hasEpisodes = Array.isArray(episodes) && episodes.length > 0;
+  const hasWorkspaces = Array.isArray(workspaces) && workspaces.length > 0;
+  const imageQueue = queueCounts?.image || 0;
+  const videoQueue = queueCounts?.video || 0;
   return (
     <header className="product-topbar">
       <div className="product-brand">
@@ -44,7 +63,61 @@ export function ProjectTopbar({ title = "", episodeTitle = "", running = false, 
         </div>
         <span>{episodeTitle} · Production OS</span>
       </div>
+      <div className="product-topbar-context">
+        {hasEpisodes ? (
+          <div className="topbar-segment" title="当前集">
+            <select
+              className="topbar-episode-select"
+              value={activeEpisodeId}
+              onChange={(event) => onEpisodeChange?.(event.target.value)}
+            >
+              {episodes.map((episode) => (
+                <option key={episode.id} value={episode.id}>{episode.name}</option>
+              ))}
+            </select>
+            {onCreateEpisode ? (
+              <button type="button" className="topbar-icon-btn" onClick={onCreateEpisode} title="新建集">＋</button>
+            ) : null}
+          </div>
+        ) : null}
+        {hasWorkspaces ? (
+          <div className="topbar-segment" title="工作配置">
+            <select
+              className="topbar-workspace-select"
+              value={activeWorkspaceId || ""}
+              onChange={(event) => onWorkspaceChange?.(event.target.value)}
+            >
+              <option value="">工作配置 · 临时</option>
+              {workspaces.map((workspace) => (
+                <option key={workspace.id} value={workspace.id}>{workspace.name}</option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+        {queueCounts ? (
+          <button
+            type="button"
+            className="topbar-queue-pill"
+            onClick={actions.openQueue}
+            title="打开生成队列"
+          >
+            队列 <b>{imageQueue + videoQueue}</b>
+            <span className="topbar-queue-breakdown">图 {imageQueue} · 视 {videoQueue}</span>
+          </button>
+        ) : null}
+      </div>
       <div className="product-topbar-actions">
+        {onSmartContinue ? (
+          <button
+            type="button"
+            className="primary topbar-smart-continue"
+            onClick={onSmartContinue}
+            title={smartContinueHint || "按当前生产进度推进下一步"}
+            disabled={running}
+          >
+            智能继续
+          </button>
+        ) : null}
         <button onClick={actions.openProject}>打开工程</button>
         <button onClick={actions.saveProject}>保存工程</button>
         {running ? <button type="button" className="danger" onClick={actions.stopQueue}>停止生成</button> : null}
@@ -95,6 +168,19 @@ export function ProjectWorkflowStepper({ activeView = "overview", progress = {},
 }
 
 export function ProjectSidebar({ activeView = "overview", setActiveView, actions = {} }) {
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const advancedRef = useRef(null);
+  useEffect(() => {
+    if (!advancedOpen) return undefined;
+    function handleClickAway(event) {
+      if (!advancedRef.current) return;
+      if (!advancedRef.current.contains(event.target)) {
+        setAdvancedOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickAway);
+    return () => document.removeEventListener("mousedown", handleClickAway);
+  }, [advancedOpen]);
   return (
     <aside className="product-sidebar">
       <div className="sidebar-group">
@@ -105,13 +191,33 @@ export function ProjectSidebar({ activeView = "overview", setActiveView, actions
           </button>
         ))}
       </div>
-      <div className="sidebar-group">
+      <div className="sidebar-group sidebar-group-advanced" ref={advancedRef}>
         <span>高级</span>
-        {advancedActions.map(([action, label]) => (
-          <button key={action} onClick={() => actions[action]?.()}>
-            {label}
-          </button>
-        ))}
+        <button
+          type="button"
+          className={`sidebar-advanced-trigger${advancedOpen ? " is-open" : ""}`}
+          onClick={() => setAdvancedOpen((value) => !value)}
+          aria-expanded={advancedOpen}
+          aria-haspopup="menu"
+        >
+          更多工具 <span aria-hidden="true">⋯</span>
+        </button>
+        {advancedOpen ? (
+          <div className="sidebar-advanced-menu" role="menu">
+            {advancedActions.map(([action, label]) => (
+              <button
+                key={action}
+                role="menuitem"
+                onClick={() => {
+                  setAdvancedOpen(false);
+                  actions[action]?.();
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
     </aside>
   );

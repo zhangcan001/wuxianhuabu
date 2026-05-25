@@ -19,5 +19,15 @@ export function buildProjectStudioProps(input = {}) {
     projectMessage: input.projectMessage,
     activeViewRequest: input.studioViewRequest,
     actions: input.projectStudioActions,
+    episodes: input.episodes || [],
+    activeEpisodeId: input.activeEpisodeId || "",
+    onEpisodeChange: input.onEpisodeChange,
+    onCreateEpisode: input.onCreateEpisode,
+    workspaces: input.workspaces || [],
+    activeWorkspaceId: input.activeWorkspaceId || "",
+    onWorkspaceChange: input.onWorkspaceChange,
+    queueCounts: input.queueCounts || null,
+    onSmartContinue: input.onSmartContinue,
+    smartContinueHint: input.smartContinueHint || "",
   };
 }

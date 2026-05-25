@@ -51,6 +51,16 @@ export function ProjectStudio({
   onUploadShotVideo,
   onSaveProject,
   onOpenProject,
+  episodes = [],
+  activeEpisodeId = "",
+  onEpisodeChange,
+  onCreateEpisode,
+  workspaces = [],
+  activeWorkspaceId = "",
+  onWorkspaceChange,
+  queueCounts = null,
+  onSmartContinue,
+  smartContinueHint = "",
 }) {
   const studioActions = useMemo(() => resolveStudioActions({
     actions,
@@ -428,6 +438,16 @@ export function ProjectStudio({
       uploadReceipt={uploadReceipt}
       onDismissUploadReceipt={() => setUploadReceipt(null)}
       activeViewRequest={activeViewRequest}
+      episodes={episodes}
+      activeEpisodeId={activeEpisodeId}
+      onEpisodeChange={onEpisodeChange}
+      onCreateEpisode={onCreateEpisode}
+      workspaces={workspaces}
+      activeWorkspaceId={activeWorkspaceId}
+      onWorkspaceChange={onWorkspaceChange}
+      queueCounts={queueCounts}
+      onSmartContinue={onSmartContinue}
+      smartContinueHint={smartContinueHint}
       queueStatus={queueRunning ? "队列运行中" : queueStats.failed ? "有失败任务待处理" : queueStats.pending ? "任务等待运行" : "空闲"}
       queue={queue}
       nextActions={productionDashboard?.nextActions || []}

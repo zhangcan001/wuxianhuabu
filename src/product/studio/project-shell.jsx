@@ -90,6 +90,16 @@ export function ProjectShell({
   pickDesktopShotImage,
   pickDesktopShotVideo,
   uploadAssetImage,
+  episodes = [],
+  activeEpisodeId = "",
+  onEpisodeChange,
+  onCreateEpisode,
+  workspaces = [],
+  activeWorkspaceId = "",
+  onWorkspaceChange,
+  queueCounts = null,
+  onSmartContinue,
+  smartContinueHint = "",
 }) {
   const [activeView, setActiveView] = useState("overview");
   const [imagePreview, setImagePreview] = useState(null);
@@ -171,7 +181,22 @@ export function ProjectShell({
       onWheel={(event) => event.stopPropagation()}
       onContextMenu={(event) => event.stopPropagation()}
     >
-      <ProjectTopbar title={title} episodeTitle={episodeTitle} running={running} actions={studioActions} />
+      <ProjectTopbar
+        title={title}
+        episodeTitle={episodeTitle}
+        running={running}
+        actions={studioActions}
+        episodes={episodes}
+        activeEpisodeId={activeEpisodeId}
+        onEpisodeChange={onEpisodeChange}
+        onCreateEpisode={onCreateEpisode}
+        workspaces={workspaces}
+        activeWorkspaceId={activeWorkspaceId}
+        onWorkspaceChange={onWorkspaceChange}
+        queueCounts={queueCounts}
+        onSmartContinue={onSmartContinue}
+        smartContinueHint={smartContinueHint}
+      />
       <ProjectWorkflowStepper activeView={activeView} progress={workflowProgress} onNavigate={setActiveView} />
       <ProjectSidebar activeView={activeView} setActiveView={setActiveView} actions={studioActions} />
 
