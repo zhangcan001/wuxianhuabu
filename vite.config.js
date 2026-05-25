@@ -14,6 +14,8 @@ const SOURCE_CHUNK_PATTERNS = [
   [/[\\/]src[\\/]panels[\\/]simple-workflow-panel\.jsx$/, "panel-simple-workflow"],
   [/[\\/]src[\\/]panels[\\/]generation-queue-panel\.jsx$/, "panel-generation-queue"],
   [/[\\/]src[\\/]panels[\\/](project-health|production-hub|archive-center)-panel\.jsx$/, "panel-ops"],
+  [/[\\/]src[\\/]panels[\\/]settings-panel\.jsx$/, "panel-settings"],
+  [/[\\/]src[\\/]panels[\\/]project-resource-panel\.jsx$/, "panel-project-resource"],
   [/[\\/]src[\\/]management-panels\.jsx$/, "management-panels"],
   [/[\\/]src[\\/]utility-panels\.jsx$/, "utility-panels"],
   [/[\\/]src[\\/]app[\\/]novel-factory-config\.js$/, "novel-factory-config"],

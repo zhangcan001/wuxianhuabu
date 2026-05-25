@@ -60,8 +60,8 @@ export const LazyDirectorAssistantPanel = lazyNamed(() => import("../management-
 export const LazyReviewCenterPanel = lazyNamed(() => import("../management-panels.jsx"), "ReviewCenterPanel");
 export const LazyCollaborationCenterPanel = lazyNamed(() => import("../management-panels.jsx"), "CollaborationCenterPanel");
 export const LazyGlobalAssetPanel = lazyNamed(() => import("../utility-panels.jsx"), "GlobalAssetPanel");
-export const LazyProjectResourcePanel = lazyNamed(() => import("../utility-panels.jsx"), "ProjectResourcePanel");
+export const LazyProjectResourcePanel = lazyNamed(() => import("../panels/project-resource-panel.jsx"), "ProjectResourcePanel");
 export const LazyGlobalSearchPanel = lazyNamed(() => import("../utility-panels.jsx"), "GlobalSearchPanel");
 export const LazyPromptPreviewPanel = lazyNamed(() => import("../utility-panels.jsx"), "PromptPreviewPanel");
-export const LazySettingsPanel = lazyNamed(() => import("../utility-panels.jsx"), "SettingsPanel");
+export const LazySettingsPanel = lazyNamed(() => import("../panels/settings-panel.jsx"), "SettingsPanel");
 export const LazyDebugTracePanel = lazyNamed(() => import("../utility-panels.jsx"), "DebugTracePanel");

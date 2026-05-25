@@ -11,6 +11,9 @@ export const DEFAULT_BUNDLE_BUDGETS = [
   { pattern: /^dist\/assets\/panel-simple-workflow-.*\.js$/, maxKb: 25, required: true },
   { pattern: /^dist\/assets\/panel-generation-queue-.*\.js$/, maxKb: 25, required: true },
   { pattern: /^dist\/assets\/panel-ops-.*\.js$/, maxKb: 30, required: true },
+  { pattern: /^dist\/assets\/panel-settings-.*\.js$/, maxKb: 70, required: true },
+  { pattern: /^dist\/assets\/panel-project-resource-.*\.js$/, maxKb: 45, required: true },
+  { pattern: /^dist\/assets\/utility-panels-.*\.js$/, maxKb: 30, required: true },
 ];
 
 export function checkBundleBudgets(files = collectBundleAssets(), budgets = DEFAULT_BUNDLE_BUDGETS) {
