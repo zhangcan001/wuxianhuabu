@@ -22,7 +22,6 @@ import {
 import {
   filterNodesInViewport,
   getNodeBounds,
-  resolvePerformanceProfile,
 } from "./canvas/canvas-performance-helpers.js";
 import {
   clamp,
@@ -175,6 +174,9 @@ import { runProjectGenerationQueue } from "./app/project-queue-runner.js";
 import {
   useDebugTraceState,
 } from "./app/hooks/use-debug-trace-state.js";
+import {
+  usePerformanceProfile,
+} from "./app/hooks/use-performance-profile.js";
 import {
   useAssetLibraryEffects,
 } from "./app/hooks/use-asset-library-effects.js";
@@ -735,7 +737,6 @@ function App() {
   const [collaborationState, setCollaborationState] = useState(initialProject.collaborationState);
   const [archiveState, setArchiveState] = useState(initialProject.archiveState);
   const [exportHistory, setExportHistory] = useState(initialProject.exportHistory || []);
-  const [performanceSettings, setPerformanceSettings] = useState(initialProject.performanceSettings);
   const [textApiSettings, setTextApiSettings] = useState(loadNovelApiSettings);
   const [showSettings, setShowSettings] = useState(false);
   const [settingsFocus, setSettingsFocus] = useState("image");
@@ -858,7 +859,12 @@ function App() {
   const episodeTimeline = useMemo(() => getEpisodeTimeline(timeline, activeEpisodeId, { defaultEpisodeTimeline }), [timeline, activeEpisodeId]);
   const visibleNodes = useMemo(() => nodes.filter((node) => isNodeVisibleInEpisode(node, activeEpisodeId, episodes)), [nodes, activeEpisodeId, episodes]);
   const panelCount = [showSettings, showGlobalAssets, showResources, showSearch, showDebugTracePanel, showDashboard, showHealth, showPromptFactory, showTemplateCenter, showStylePresetCenter, showModelParamCenter, showExportPresetCenter, showDirectorAssistant, showReviewCenter, showCollaborationCenter, showProductionHub, showArchiveCenter, showTimeline, showQueue, Boolean(promptPreview)].filter(Boolean).length;
-  const performanceProfile = useMemo(() => resolvePerformanceProfile(performanceSettings, visibleNodes.length, edges.length, panelCount), [performanceSettings, visibleNodes.length, edges.length, panelCount]);
+  const performanceProfileState = usePerformanceProfile(initialProject.performanceSettings, {
+    nodeCount: visibleNodes.length,
+    edgeCount: edges.length,
+    panelCount,
+  });
+  const { performanceSettings, setPerformanceSettings, performanceProfile } = performanceProfileState;
   const nodeById = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
   const nodeByIdRef = useLatestRef(nodeById);
   const selectedNodeIds = useMemo(() => nodes.filter((node) => node.selected).map((node) => node.id), [nodes]);
