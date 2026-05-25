@@ -44,6 +44,7 @@ import {
   executeBusinessOptimizationAction,
   executeBusinessOptimizationPlan,
 } from "./business-optimization-actions.js";
+import { NOVEL_SEED_LIBRARY } from "../../app/novel-seed-library.js";
 
 export function ProjectShell({
   title = "小说视频生产工作台",
@@ -250,6 +251,27 @@ export function ProjectShell({
             <div className="panel-title">
               <strong>小说 / 剧情梗概</strong>
               <span>输入文本后生成可生产剧本、资产和镜头表</span>
+            </div>
+            <div className="novel-seed-strip">
+              <span className="novel-seed-label">没思路？挑一颗种子开始：</span>
+              <div className="novel-seed-chips">
+                {NOVEL_SEED_LIBRARY.map((seed) => (
+                  <button
+                    key={seed.key}
+                    type="button"
+                    className="novel-seed-chip"
+                    title={seed.styleHint}
+                    onClick={() => {
+                      const current = String(sourceText || "").trim();
+                      if (current && !window.confirm(`当前已有 ${current.length} 字。用「${seed.label}」覆盖？`)) return;
+                      setSourceText?.(seed.text);
+                    }}
+                  >
+                    <span className="novel-seed-chip-label">{seed.label}</span>
+                    <span className="novel-seed-chip-tag">{seed.tag}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             <textarea
               value={sourceText}
