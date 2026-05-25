@@ -4,7 +4,6 @@ export const DEFAULT_BUNDLE_BUDGETS = [
   { pattern: /^dist\/assets\/index-.*\.js$/, maxKb: 680, required: true },
   { pattern: /^dist\/assets\/three-.*\.js$/, maxKb: 780 },
   { pattern: /^dist\/assets\/index-.*\.css$/, maxKb: 145, required: true },
-  { pattern: /^dist\/assets\/legacy-canvas-shell-.*\.js$/, maxKb: 25, required: true },
   { pattern: /^dist\/assets\/project-studio-.*\.js$/, maxKb: 110, required: true },
   { pattern: /^dist\/assets\/workspace-panels-.*\.js$/, maxKb: 120, required: true },
 ];

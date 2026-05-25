@@ -44,7 +44,6 @@ export class UiErrorBoundary extends React.Component {
 
 export const LazyProjectDashboardPanel = lazyNamed(() => import("../lazy-panels.jsx"), "ProjectDashboardPanel");
 export const LazyProjectStudio = lazyNamed(() => import("../project-studio.jsx"), "ProjectStudio");
-export const LazyLegacyCanvasOverlay = lazyNamed(() => import("./legacy-canvas-shell.jsx"), "LegacyCanvasOverlay");
 export const LazySimpleWorkflowPanel = lazyNamed(() => import("../lazy-panels.jsx"), "SimpleWorkflowPanel");
 export const LazyGenerationQueuePanel = lazyNamed(() => import("../lazy-panels.jsx"), "GenerationQueuePanel");
 export const LazyTimelinePanel = lazyNamed(() => import("../lazy-panels.jsx"), "TimelinePanel");
@@ -60,22 +59,9 @@ export const LazyExportPresetCenterPanel = lazyNamed(() => import("../management
 export const LazyDirectorAssistantPanel = lazyNamed(() => import("../management-panels.jsx"), "DirectorAssistantPanel");
 export const LazyReviewCenterPanel = lazyNamed(() => import("../management-panels.jsx"), "ReviewCenterPanel");
 export const LazyCollaborationCenterPanel = lazyNamed(() => import("../management-panels.jsx"), "CollaborationCenterPanel");
-export const LazyNovelPipelineNode = lazyNamed(() => import("../heavy-nodes.jsx"), "NovelPipelineNode");
-export const LazyStoryboardNode = lazyNamed(() => import("../heavy-nodes.jsx"), "StoryboardNode");
-export const LazySplitNode = lazyNamed(() => import("../heavy-nodes.jsx"), "SplitNode");
-export const LazyVr360Node = lazyNamed(() => import("../heavy-nodes.jsx"), "Vr360Node");
-export const LazyShotListNode = lazyNamed(() => import("../canvas-heavy-nodes.jsx"), "ShotListNode");
-export const LazyAssetLibraryNode = lazyNamed(() => import("../canvas-heavy-nodes.jsx"), "AssetLibraryNode");
-export const LazyDirectorNode = lazyNamed(() => import("../canvas-heavy-nodes.jsx"), "DirectorNode");
-export const LazyUploadNode = lazyNamed(() => import("../basic-nodes.jsx"), "UploadNode");
-export const LazyImageEditNode = lazyNamed(() => import("../basic-nodes.jsx"), "ImageEditNode");
-export const LazyGeminiWebNode = lazyNamed(() => import("../basic-nodes.jsx"), "GeminiWebNode");
-export const LazyTextNode = lazyNamed(() => import("../basic-nodes.jsx"), "TextNode");
-export const LazyResultNode = lazyNamed(() => import("../basic-nodes.jsx"), "ResultNode");
 export const LazyGlobalAssetPanel = lazyNamed(() => import("../utility-panels.jsx"), "GlobalAssetPanel");
 export const LazyProjectResourcePanel = lazyNamed(() => import("../utility-panels.jsx"), "ProjectResourcePanel");
 export const LazyGlobalSearchPanel = lazyNamed(() => import("../utility-panels.jsx"), "GlobalSearchPanel");
 export const LazyPromptPreviewPanel = lazyNamed(() => import("../utility-panels.jsx"), "PromptPreviewPanel");
 export const LazySettingsPanel = lazyNamed(() => import("../utility-panels.jsx"), "SettingsPanel");
 export const LazyDebugTracePanel = lazyNamed(() => import("../utility-panels.jsx"), "DebugTracePanel");
-export const LazyMinimapPanel = lazyNamed(() => import("../minimap-panel.jsx"), "MinimapPanel");

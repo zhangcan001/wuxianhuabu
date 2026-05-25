@@ -80,29 +80,20 @@ test("main app delegates reusable UI boundaries to app module", () => {
 test("main app keeps legacy canvas behind compatibility mode", () => {
   const content = readFileSync(join(root, "src", "main.jsx"), "utf8");
   const workspaceNavigation = readFileSync(join(root, "src", "app", "workspace-navigation.js"), "utf8");
-  const legacyCanvasShell = readFileSync(join(root, "src", "app", "legacy-canvas-shell.jsx"), "utf8");
-  const legacyCanvasBanner = readFileSync(join(root, "src", "app", "legacy-canvas-banner.jsx"), "utf8");
   const lazyComponents = readFileSync(join(root, "src", "app", "lazy-components.jsx"), "utf8");
-  const canvasNode = readFileSync(join(root, "src", "app", "canvas-node.jsx"), "utf8");
   const panelPropBuilders = readFileSync(join(root, "src", "app", "panel-prop-builders.js"), "utf8");
 
   assert.match(content, /showCompatibilityCanvas/);
-  assert.match(legacyCanvasBanner, /compat-canvas-banner/);
-  assert.match(legacyCanvasShell, /export function LegacyCanvasOverlay/);
-  assert.match(legacyCanvasShell, /<svg className="edge-layer"/);
-  assert.match(content, /onDoubleClick=\{showCompatibilityCanvas \? handleStageDoubleClick : undefined\}/);
-  assert.match(content, /<LazyLegacyCanvasOverlay/);
-  assert.match(lazyComponents, /LazyLegacyCanvasOverlay/);
-  assert.match(canvasNode, /export function CanvasNode/);
-  assert.match(canvasNode, /LazyShotListNode/);
-  assert.match(content, /\{showCompatibilityCanvas && performanceSettings\.showMinimap && \(/);
+  assert.doesNotMatch(content, /<LazyLegacyCanvasOverlay/);
+  assert.doesNotMatch(lazyComponents, /LazyLegacyCanvasOverlay/);
+  assert.doesNotMatch(content, /legacy-canvas-banner\.jsx/);
+  assert.doesNotMatch(content, /legacy-canvas-shell\.jsx/);
   assert.match(content, /function openProductionStudio/);
   assert.match(content, /function openProductionStudioView/);
   assert.match(content, /function openNodeTargetInProductionStudio/);
   assert.match(content, /buildProjectStudioProps/);
   assert.match(panelPropBuilders, /activeViewRequest:\s*input\.studioViewRequest/);
   assert.match(content, /workspace-navigation\.js/);
-  assert.match(content, /legacy-canvas-banner\.jsx/);
   assert.match(content, /panorama-runtime\.js/);
   assert.match(content, /syncCanvasNodesToProjectStore/);
   assert.match(content, /patchCanvasNodeAndSyncProjectStore/);
@@ -396,9 +387,6 @@ test("new app orchestration modules own extracted main responsibilities", () => 
     "system-self-check-action.js",
     "production-media-queue-actions.js",
     "panel-prop-builders.js",
-    "legacy-canvas-banner.jsx",
-    "legacy-canvas-shell.jsx",
-    "canvas-node.jsx",
     "panorama-runtime.js",
     "health-fix-prompts.js",
     "media-provider-runtime.js",
@@ -437,7 +425,6 @@ test("release and migration guardrails stay wired", () => {
   assert.match(releaseSafety, /desktop-release-smoke\.mjs/);
   assert.match(releaseSafety, /versions: "synced"/);
   assert.match(releaseSafety, /nsis: "configured"/);
-  assert.match(bundleBudget, /legacy-canvas-shell/);
   assert.match(bundleBudget, /project-studio/);
   assert.match(bundleBudget, /workspace-panels/);
   assert.match(smokePreview, /--strictPort/);

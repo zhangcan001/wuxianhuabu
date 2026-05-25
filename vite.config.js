@@ -10,11 +10,7 @@ const VENDOR_CHUNK_PATTERNS = [
 const SOURCE_CHUNK_PATTERNS = [
   [/[\\/]src[\\/]lazy-panels\.jsx$/, "workspace-panels"],
   [/[\\/]src[\\/]management-panels\.jsx$/, "management-panels"],
-  [/[\\/]src[\\/]heavy-nodes\.jsx$/, "heavy-nodes"],
-  [/[\\/]src[\\/]canvas-heavy-nodes\.jsx$/, "canvas-heavy-nodes"],
-  [/[\\/]src[\\/]basic-nodes\.jsx$/, "basic-nodes"],
   [/[\\/]src[\\/]utility-panels\.jsx$/, "utility-panels"],
-  [/[\\/]src[\\/]minimap-panel\.jsx$/, "minimap-panel"],
   [/[\\/]src[\\/]app[\\/]novel-factory-config\.js$/, "novel-factory-config"],
   [/[\\/]src[\\/]novel-factory-default-templates\.js$/, "novel-factory-templates"],
 ];

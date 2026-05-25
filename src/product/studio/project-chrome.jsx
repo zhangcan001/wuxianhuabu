@@ -15,7 +15,6 @@ const workflowSteps = [
 ];
 
 const advancedActions = [
-  ["openAdvancedCanvas", "兼容画布"],
   ["openPromptFactory", "Prompt 工厂"],
   ["openSettings", "API 设置"],
   ["openDashboard", "总控台"],

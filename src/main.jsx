@@ -570,9 +570,6 @@ import {
   renderPerspectiveFromPanorama,
 } from "./app/panorama-runtime.js";
 import {
-  LegacyCanvasBanner,
-} from "./app/legacy-canvas-banner.jsx";
-import {
   appendPipelineSyncAction,
   buildPipelineSyncExecutionPlan,
   buildPipelineSyncQueueMessage,
@@ -615,8 +612,6 @@ import {
   LazyGenerationQueuePanel,
   LazyGlobalAssetPanel,
   LazyGlobalSearchPanel,
-  LazyLegacyCanvasOverlay,
-  LazyMinimapPanel,
   LazyModelParamCenterPanel,
   LazyProductionHubPanel,
   LazyProjectDashboardPanel,
@@ -661,7 +656,6 @@ import {
   STORAGE_KEY,
 } from "./app/app-constants.js";
 import {
-  openAdvancedCanvasNavigation,
   focusMainChainNavigation,
   openNodeTargetInProductionStudioNavigation,
   openProductionStudioNavigation,
@@ -6211,19 +6205,7 @@ async function runGenerationQueue() {
   }
 
   function openAdvancedCanvas() {
-    openAdvancedCanvasNavigation({
-      commercialProject,
-      nodes,
-      nodesRef,
-      edges,
-      viewportCenter,
-      mergeAdvancedCanvasProjection,
-      setNodes,
-      setEdges,
-      setShowCompatibilityCanvas,
-      setShowProjectStudio,
-      setProjectMessage,
-    });
+    setProjectMessage?.("兼容画布已下线，所有数据请在生产工作台操作。");
   }
 
   function openProductionStudio(message = "已返回生产工作台。") {
@@ -6910,110 +6892,11 @@ async function runGenerationQueue() {
 
   return (
     <main
-      className={`app ${pan ? "is-panning" : ""} ${showCompatibilityCanvas ? "compat-canvas-open" : "production-primary"} perf-${performanceProfile}`}
+      className={`app production-primary perf-${performanceProfile}`}
       ref={stageRef}
-      onDoubleClick={showCompatibilityCanvas ? handleStageDoubleClick : undefined}
-      onContextMenu={showCompatibilityCanvas ? handleStageContextMenu : undefined}
-      onWheel={showCompatibilityCanvas ? handleWheel : undefined}
-      onPointerDown={showCompatibilityCanvas ? beginPan : undefined}
-      onPointerMove={showCompatibilityCanvas ? onPointerMove : undefined}
-      onPointerUp={showCompatibilityCanvas ? endPointer : undefined}
-      onPointerLeave={showCompatibilityCanvas ? endPointer : undefined}
     >
       {showOnboardingWizard && (
         <OnboardingWizard onComplete={handleOnboardingComplete} onSkip={handleOnboardingSkip} />
-      )}
-      {showCompatibilityCanvas && (
-        <Suspense fallback={<PanelLoadingFallback label="正在打开兼容画布" />}>
-          <LazyLegacyCanvasOverlay
-            show
-            selectionBox={selectionBox}
-            edgeLayerRef={edgeLayerRef}
-            visibleEdges={visibleEdges}
-            nodeById={nodeById}
-            view={view}
-            selectedEdgeId={selectedEdgeId}
-            selectEdge={(edgeId) => {
-              setSelectedEdgeId(edgeId);
-              setNodes((current) => current.map((node) => ({ ...node, selected: false })));
-              setMenu(null);
-              setNodeMenu(null);
-              setEdgeMenu(null);
-            }}
-            openEdgeMenu={(edgeId, event) => {
-              setSelectedEdgeId(edgeId);
-              setEdgeMenu({ edgeId, screenX: event.clientX, screenY: event.clientY });
-              setNodeMenu(null);
-              setMenu(null);
-            }}
-            connectionDrag={connectionDrag}
-            worldRef={worldRef}
-            renderNodes={renderNodes}
-            guardNode={GuardedNode}
-            nodeRuntime={canvasNodeRuntime}
-            nodeMenuItems={NODE_MENU}
-            drag={drag}
-            highlightedNodeId={highlightedNodeId}
-            nodes={nodes}
-            selectedNodeIds={selectedNodeIds}
-            marqueeMode={marqueeMode}
-            shiftPressedRef={shiftPressedRef}
-            updateNode={updateNode}
-            selectNode={selectNode}
-            setDrag={setDrag}
-            setResize={setResize}
-            addNode={addNode}
-            connectFromLast={connectFromLast}
-            createOutputNear={createOutputNear}
-            createManyOutputs={createManyOutputs}
-            deleteNode={deleteNode}
-            duplicateNode={duplicateNode}
-            openNodeMenu={(nodeId, event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              selectNode(nodeId);
-              setNodeMenu({ nodeId, screenX: event.clientX, screenY: event.clientY });
-              setMenu(null);
-              setEdgeMenu(null);
-            }}
-            startConnection={startConnection}
-            finishConnection={finishConnection}
-            pushHistory={pushHistory}
-            settings={settings}
-            textApiSettings={textApiSettings}
-            patchTextApiSettings={patchTextApiSettings}
-            openSettings={openSettingsPanel}
-            stylePresetCenter={stylePresetCenter}
-            onOpenStylePresetCenter={() => setShowStylePresetCenter(true)}
-            viewRef={viewRef}
-            assetIndex={assetIndex}
-            openPromptPreview={(payload) => setPromptPreview(payload)}
-            addGenerationJobs={(jobs) => addGenerationJobsAndMaybeRun(jobs, { autoRun: true })}
-            resourceIndex={resourceIndex}
-            importShotsToTimeline={importShotsToTimeline}
-            syncPipelineToLinkedNodes={syncPipelineToLinkedNodes}
-            sendImageToLinkedNode={sendImageToLinkedNode}
-            appendShotsToNearestShotList={appendShotsToNearestShotList}
-            applyResultToNearestShot={applyResultToNearestShot}
-            handleResultShotAction={handleResultShotAction}
-            createPromptNodeFromAsset={createPromptNodeFromAsset}
-            locateResultForShot={locateResultForShot}
-            visibleNodes={visibleNodes}
-            activeEpisodeName={episodes.find((episode) => episode.id === activeEpisodeId)?.name}
-            menu={menu}
-            nodeMenu={nodeMenu}
-            edgeMenu={edgeMenu}
-            sendResultToSplit={sendResultToSplit}
-            deleteEdge={deleteEdge}
-          />
-        </Suspense>
-      )}
-      {showCompatibilityCanvas && (
-        <LegacyCanvasBanner
-          onReturnToStudio={() => {
-            openProductionStudio("已返回生产工作台，并按商业模型刷新兼容投影。");
-          }}
-        />
       )}
       {showProjectStudio && (
         <Suspense fallback={<PanelLoadingFallback label="正在打开生产工作台" />}>
@@ -7088,9 +6971,6 @@ async function runGenerationQueue() {
                 <option value="quality">性能 高质</option>
                 <option value="lite">性能 流畅</option>
               </select>
-              {showCompatibilityCanvas && (
-                <button onClick={() => setPerformanceSettings(normalizePerformanceSettings({ ...performanceSettings, showMinimap: !performanceSettings.showMinimap }))}>{performanceSettings.showMinimap ? "隐藏小地图" : "显示小地图"}</button>
-              )}
               <button onClick={() => setShowDebugTracePanel(true)}>日志面板 {debugTraceEntries.length}</button>
               <button
                 className={debugTraceEnabled ? "active" : ""}
@@ -7100,20 +6980,6 @@ async function runGenerationQueue() {
                 {debugTraceEnabled ? "调试日志 开" : "调试日志 关"}
               </button>
             </div>
-            {showCompatibilityCanvas && (
-              <div className="hud-group">
-                <button
-                  className={marqueeMode ? "active" : ""}
-                  onClick={toggleMarqueeMode}
-                  title="打开后，左键拖拽画布即框选节点"
-                >
-                  {marqueeMode ? "框选模式 开" : "框选模式 关"}
-                </button>
-                <button onClick={undo} disabled={!history.past.length}>撤销</button>
-                <button onClick={redo} disabled={!history.future.length}>重做</button>
-                <button onClick={autoArrangeCanvas}>整理画布</button>
-              </div>
-            )}
             <div className="hud-group">
               <button onClick={() => resourceInputRef.current?.click()}>导入资源</button>
               {isTauriRuntime() && (
@@ -7132,17 +6998,6 @@ async function runGenerationQueue() {
         <div className="project-toast">
           {projectMessage || autoSaveState || (currentProjectPath ? `当前工程：${currentProjectPath}` : "")}
         </div>
-      )}
-      {showCompatibilityCanvas && performanceSettings.showMinimap && (
-        <Suspense fallback={null}>
-          <LazyMinimapPanel
-            nodes={visibleNodes}
-            view={view}
-            selectedNodeId={selectedNode?.id || ""}
-            profile={performanceProfile}
-            helpers={{ getNodeBounds }}
-          />
-        </Suspense>
       )}
       {showSettings && (
         <GuardedPanel title="API控制台" onClose={() => setShowSettings(false)} resetKey={`settings-${settingsFocus}`}>
