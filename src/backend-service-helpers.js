@@ -1,4 +1,4 @@
-import { convertFileSrc } from "@tauri-apps/api/core";
+import { convertFileSrc } from "./app/tauri-runtime-bridge.js";
 import {
   cacheMediaAsset,
   diagnoseImageCustomApi,

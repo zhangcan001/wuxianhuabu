@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { convertFileSrc } from "@tauri-apps/api/core";
+import { convertFileSrc } from "./app/tauri-runtime-bridge.js";
 import {
   resolveStudioActions,
 } from "./app/studio-action-adapter.js";

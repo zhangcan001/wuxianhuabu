@@ -274,6 +274,8 @@ test("main app delegates queue and project path state to app hooks", () => {
   assert.doesNotMatch(content, /function summarizeHudTextSettings/);
   assert.doesNotMatch(content, /function summarizeHudMediaSettings/);
   assert.doesNotMatch(content, /function providerLabel/);
+  assert.doesNotMatch(content, /^let nextNodeId\s*=\s*1;/m);
+  assert.doesNotMatch(content, /from\s+["']@tauri-apps\//);
   assert.doesNotMatch(content, /function makeCanvas\b/);
   assert.doesNotMatch(content, /function makeGeneratedImage/);
   assert.doesNotMatch(content, /function makeStoryboardImage/);

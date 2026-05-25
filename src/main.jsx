@@ -1,6 +1,6 @@
 import React, { Suspense, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { convertFileSrc } from "@tauri-apps/api/core";
+import { convertFileSrc } from "./app/tauri-runtime-bridge.js";
 import {
   listenTimelineRenderProgress,
   deleteMediaCacheFiles as invokeDeleteMediaCacheFiles,
@@ -662,9 +662,12 @@ import {
   openSettingsPanelNavigation,
   openWorkflowActionNavigation,
 } from "./app/workspace-navigation.js";
+import {
+  allocateNodeId,
+  getNextNodeIdValue,
+  setNextNodeIdValue,
+} from "./app/node-id-counter.js";
 import "./styles.css";
-
-let nextNodeId = 1;
 
 const {
   defaultTemplateCenterState,
@@ -1380,7 +1383,7 @@ function App() {
     if (Object.prototype.hasOwnProperty.call(restored, "productionEvents")) setProductionEvents(restored.productionEvents);
     setEpisodes(restored.episodes);
     setActiveEpisodeId(restored.activeEpisodeId);
-    nextNodeId = restored.nextNodeId;
+    setNextNodeIdValue(restored.nextNodeId);
     setMenu(null);
     setDrag(null);
     setResize(null);
@@ -1388,7 +1391,7 @@ function App() {
   }
 
   function applyEditorProjectState(nextState) {
-    if (Object.prototype.hasOwnProperty.call(nextState, "nextNodeId")) nextNodeId = nextState.nextNodeId;
+    if (Object.prototype.hasOwnProperty.call(nextState, "nextNodeId")) setNextNodeIdValue(nextState.nextNodeId);
     if (Object.prototype.hasOwnProperty.call(nextState, "nodes")) setNodes(nextState.nodes);
     if (Object.prototype.hasOwnProperty.call(nextState, "edges")) setEdges(nextState.edges);
     if (Object.prototype.hasOwnProperty.call(nextState, "view")) setView(nextState.view);
@@ -1584,7 +1587,7 @@ function App() {
     const id = `episode-${Date.now()}`;
     const nodeIdMap = new Map();
     const clonedNodes = sourceNodes.map((node, index) => {
-      const newId = `node-${nextNodeId++}`;
+      const newId = allocateNodeId();
       nodeIdMap.set(node.id, newId);
       return {
         ...structuredCloneSafe(node),
@@ -2702,7 +2705,7 @@ function App() {
     const episode = episodes.find((item) => item.id === episodeId);
     const timelineState = getEpisodeTimeline(timeline, episodeId, { defaultEpisodeTimeline });
     const text = formatTimelineText(episode?.name || "当前集", timelineState);
-    const id = `node-${nextNodeId++}`;
+    const id = allocateNodeId();
     const position = {
       x: viewportCenter.x + 420,
       y: viewportCenter.y - 180,
@@ -3739,7 +3742,7 @@ function App() {
   function exportTemplateCenterTemplate(templateId) {
     const template = (templateCenter.templates || []).find((item) => item.id === templateId);
     if (!template) return;
-    const id = `node-${nextNodeId++}`;
+    const id = allocateNodeId();
     const base = createNode("text", id, { x: viewportCenter.x + 460, y: viewportCenter.y - 180 }, {
       displayName: `${template.name} 模板`,
       text: `# ${template.name}\n\n分类：${templateCategoryLabel(template.category)}\n\n${template.content}`,
@@ -4320,7 +4323,7 @@ async function runGenerationQueue() {
   function addNode(type, position = viewportCenter, extras = {}) {
     pushHistory();
     if (["imageEdit", "storyboard", "shotList", "novelPipeline"].includes(type)) refreshGlobalApiConfigs();
-    const id = `node-${nextNodeId++}`;
+    const id = allocateNodeId();
     const base = createNode(type, id, position, { ...extras, episodeId: extras.episodeId || activeEpisodeId });
     setNodes((current) => [...current.map((node) => ({ ...node, selected: false })), base]);
     setMenu(null);
@@ -5026,7 +5029,7 @@ async function runGenerationQueue() {
     pushHistory();
     const nodeIdMap = new Map();
     const clonedNodes = sourceNodes.map((node, index) => {
-      const newId = `node-${nextNodeId++}`;
+      const newId = allocateNodeId();
       nodeIdMap.set(node.id, newId);
       return {
         ...structuredCloneSafe(node),
@@ -6450,10 +6453,10 @@ async function runGenerationQueue() {
       sourceNode: source,
       outputs,
       activeEpisodeId,
-      nextNodeId,
+      nextNodeId: getNextNodeIdValue(),
       createNode,
     });
-    nextNodeId = plan.nextNodeId;
+    setNextNodeIdValue(plan.nextNodeId);
     setNodes((current) => [...current.map((node) => ({ ...node, selected: false })), ...plan.createdNodes]);
     setEdges((current) => [...current, ...plan.createdEdges]);
     return plan.ids;
@@ -7620,11 +7623,11 @@ function loadSavedProject() {
     const raw = localStorage.getItem(STORAGE_KEY);
     let project = raw ? normalizeProject(JSON.parse(raw)) : normalizeProject({});
     project = restorePersistedAssets(project);
-    nextNodeId = inferNextNodeId(project.nodes);
+    setNextNodeIdValue(inferNextNodeId(project.nodes));
     return project;
   } catch {
     const project = restorePersistedAssets(normalizeProject({}));
-    nextNodeId = inferNextNodeId(project.nodes);
+    setNextNodeIdValue(inferNextNodeId(project.nodes));
     return project;
   }
 }
