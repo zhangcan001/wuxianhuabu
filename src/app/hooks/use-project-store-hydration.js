@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import {
   projectStoreReducer,
-} from "./project-store.js";
+} from "../project-store.js";
 
 export function useProjectStoreHydration({
   legacyCommercialProject,

@@ -2,14 +2,14 @@ import { useCallback, useEffect } from "react";
 
 import {
   refreshMediaCacheIndexAction,
-} from "./project-media-cache-actions.js";
+} from "../project-media-cache-actions.js";
 import {
   refreshProjectIndexSummaryAction,
   syncProjectIndexToSqliteAction,
-} from "./project-index-actions.js";
+} from "../project-index-actions.js";
 import {
   buildProjectIndexPayload,
-} from "../storage/project-sqlite-index-helpers.js";
+} from "../../storage/project-sqlite-index-helpers.js";
 
 const PROJECT_INDEX_WRITE_DELAY_MS = 1600;
 

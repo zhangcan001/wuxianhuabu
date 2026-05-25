@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import {
   cacheProjectWithFallback,
-} from "./project-cache-service.js";
+} from "../project-cache-service.js";
 
 export function useProjectPersistenceEffects({
   projectRepository,

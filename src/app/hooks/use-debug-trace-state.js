@@ -5,7 +5,7 @@ import {
   getDebugTraceEntries,
   loadDebugTraceEnabled,
   saveDebugTraceEnabled,
-} from "../debug-trace-helpers.js";
+} from "../../debug-trace-helpers.js";
 
 export function useDebugTraceState({
   storage,

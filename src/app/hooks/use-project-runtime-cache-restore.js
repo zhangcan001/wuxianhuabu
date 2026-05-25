@@ -2,10 +2,10 @@ import { useEffect, useRef } from "react";
 
 import {
   loadProjectCacheThroughRuntime,
-} from "../storage/project-file-helpers.js";
+} from "../../storage/project-file-helpers.js";
 import {
   applyLoadedProjectAction,
-} from "./project-io-actions.js";
+} from "../project-io-actions.js";
 
 export function useProjectRuntimeCacheRestore({
   projectRepository,

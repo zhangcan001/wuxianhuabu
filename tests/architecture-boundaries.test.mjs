@@ -170,16 +170,16 @@ test("asset library panel is a real split panel and uses shared primitives", () 
 test("main app uses project repository for project persistence", () => {
   const content = readFileSync(join(root, "src", "main.jsx"), "utf8");
   const runtimeRepository = readFileSync(join(root, "src", "app", "project-runtime-repository.js"), "utf8");
-  const persistenceHook = readFileSync(join(root, "src", "app", "use-project-persistence-effects.js"), "utf8");
-  const restoreHook = readFileSync(join(root, "src", "app", "use-project-runtime-cache-restore.js"), "utf8");
-  const storeHydrationHook = readFileSync(join(root, "src", "app", "use-project-store-hydration.js"), "utf8");
-  const timelineProgressHook = readFileSync(join(root, "src", "app", "use-timeline-render-progress-listener.js"), "utf8");
-  const debugTraceHook = readFileSync(join(root, "src", "app", "use-debug-trace-state.js"), "utf8");
-  const runtimeIndexHook = readFileSync(join(root, "src", "app", "use-project-runtime-index-effects.js"), "utf8");
-  const apiConfigHook = readFileSync(join(root, "src", "app", "use-global-api-config-state.js"), "utf8");
-  const assetLibraryHook = readFileSync(join(root, "src", "app", "use-asset-library-effects.js"), "utf8");
-  const keyboardHook = readFileSync(join(root, "src", "app", "use-canvas-keyboard-shortcuts.js"), "utf8");
-  const timeoutCleanupHook = readFileSync(join(root, "src", "app", "use-timeout-ref-cleanup.js"), "utf8");
+  const persistenceHook = readFileSync(join(root, "src", "app", "hooks", "use-project-persistence-effects.js"), "utf8");
+  const restoreHook = readFileSync(join(root, "src", "app", "hooks", "use-project-runtime-cache-restore.js"), "utf8");
+  const storeHydrationHook = readFileSync(join(root, "src", "app", "hooks", "use-project-store-hydration.js"), "utf8");
+  const timelineProgressHook = readFileSync(join(root, "src", "app", "hooks", "use-timeline-render-progress-listener.js"), "utf8");
+  const debugTraceHook = readFileSync(join(root, "src", "app", "hooks", "use-debug-trace-state.js"), "utf8");
+  const runtimeIndexHook = readFileSync(join(root, "src", "app", "hooks", "use-project-runtime-index-effects.js"), "utf8");
+  const apiConfigHook = readFileSync(join(root, "src", "app", "hooks", "use-global-api-config-state.js"), "utf8");
+  const assetLibraryHook = readFileSync(join(root, "src", "app", "hooks", "use-asset-library-effects.js"), "utf8");
+  const keyboardHook = readFileSync(join(root, "src", "app", "hooks", "use-canvas-keyboard-shortcuts.js"), "utf8");
+  const timeoutCleanupHook = readFileSync(join(root, "src", "app", "hooks", "use-timeout-ref-cleanup.js"), "utf8");
 
   assert.match(content, /createRuntimeProjectRepository/);
   assert.match(content, /useProjectRuntimeCacheRestore/);
@@ -381,7 +381,7 @@ test("app action modules stay free of React and Tauri runtime imports", () => {
 });
 
 test("new app orchestration modules own extracted main responsibilities", () => {
-  const expected = [
+  const expectedAppFiles = [
     "project-queue-runner.js",
     "project-delivery-actions.js",
     "project-media-upload-actions.js",
@@ -391,11 +391,6 @@ test("new app orchestration modules own extracted main responsibilities", () => 
     "project-health-fix-runner.js",
     "project-media-cache-actions.js",
     "project-index-actions.js",
-    "use-project-runtime-index-effects.js",
-    "use-global-api-config-state.js",
-    "use-asset-library-effects.js",
-    "use-canvas-keyboard-shortcuts.js",
-    "use-timeout-ref-cleanup.js",
     "project-export-actions.js",
     "full-chain-check-action.js",
     "system-self-check-action.js",
@@ -408,9 +403,18 @@ test("new app orchestration modules own extracted main responsibilities", () => 
     "health-fix-prompts.js",
     "media-provider-runtime.js",
   ];
+  const expectedHookFiles = [
+    "use-project-runtime-index-effects.js",
+    "use-global-api-config-state.js",
+    "use-asset-library-effects.js",
+    "use-canvas-keyboard-shortcuts.js",
+    "use-timeout-ref-cleanup.js",
+  ];
   const appFiles = new Set(listSourceFiles(join(root, "src", "app")).map((file) => relative(join(root, "src", "app"), file)));
+  const hookFiles = new Set(listSourceFiles(join(root, "src", "app", "hooks")).map((file) => relative(join(root, "src", "app", "hooks"), file)));
 
-  expected.forEach((file) => assert.equal(appFiles.has(file), true, `${file} should exist`));
+  expectedAppFiles.forEach((file) => assert.equal(appFiles.has(file), true, `${file} should exist in src/app/`));
+  expectedHookFiles.forEach((file) => assert.equal(hookFiles.has(file), true, `${file} should exist in src/app/hooks/`));
 });
 
 test("release and migration guardrails stay wired", () => {

@@ -141,7 +141,7 @@ Video Pipeline -> Text Pipeline
 
 - `src/app/*-actions.js`：可测试的应用动作，负责把 UI 请求转换为项目命令、队列提交或运行时端口调用。
 - `src/app/*-runtime.js`：运行时适配和动态加载，例如全景/Three.js 能力。
-- `src/app/use-*.js`：顶层状态副作用和事件监听。
+- `src/app/hooks/use-*.js`：顶层状态副作用和事件监听（React Hooks 集中目录）。
 - `src/app/legacy-canvas-*.jsx`：兼容画布 UI 边界，只在用户打开旧画布时加载。
 - `src/app/canvas-node.jsx`：兼容画布节点壳，节点内部仍通过懒加载拆到 basic/heavy/canvas-heavy 节点文件。
 - `src/product/studio/*`：生产工作台 UI。它可以调用 app actions，但不应直接依赖旧画布 adapter。

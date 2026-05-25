@@ -174,49 +174,49 @@ import {
 import { runProjectGenerationQueue } from "./app/project-queue-runner.js";
 import {
   useDebugTraceState,
-} from "./app/use-debug-trace-state.js";
+} from "./app/hooks/use-debug-trace-state.js";
 import {
   useAssetLibraryEffects,
-} from "./app/use-asset-library-effects.js";
+} from "./app/hooks/use-asset-library-effects.js";
 import {
   useCanvasKeyboardShortcuts,
-} from "./app/use-canvas-keyboard-shortcuts.js";
+} from "./app/hooks/use-canvas-keyboard-shortcuts.js";
 import {
   useGenerationQueueState,
-} from "./app/use-generation-queue-state.js";
+} from "./app/hooks/use-generation-queue-state.js";
 import {
   useGlobalApiConfigState,
-} from "./app/use-global-api-config-state.js";
+} from "./app/hooks/use-global-api-config-state.js";
 import {
   useHudState,
-} from "./app/use-hud-state.js";
+} from "./app/hooks/use-hud-state.js";
 import {
   useLatestRef,
-} from "./app/use-latest-ref.js";
+} from "./app/hooks/use-latest-ref.js";
 import {
   useProjectPathState,
-} from "./app/use-project-path-state.js";
+} from "./app/hooks/use-project-path-state.js";
 import {
   useProjectPersistenceEffects,
-} from "./app/use-project-persistence-effects.js";
+} from "./app/hooks/use-project-persistence-effects.js";
 import {
   useProjectRuntimeCacheRestore,
-} from "./app/use-project-runtime-cache-restore.js";
+} from "./app/hooks/use-project-runtime-cache-restore.js";
 import {
   useProjectRuntimeIndexEffects,
-} from "./app/use-project-runtime-index-effects.js";
+} from "./app/hooks/use-project-runtime-index-effects.js";
 import {
   useProjectStoreHydration,
-} from "./app/use-project-store-hydration.js";
+} from "./app/hooks/use-project-store-hydration.js";
 import {
   useStartupProjectGuide,
-} from "./app/use-startup-project-guide.js";
+} from "./app/hooks/use-startup-project-guide.js";
 import {
   useTimelineRenderProgressListener,
-} from "./app/use-timeline-render-progress-listener.js";
+} from "./app/hooks/use-timeline-render-progress-listener.js";
 import {
   useTimeoutRefCleanup,
-} from "./app/use-timeout-ref-cleanup.js";
+} from "./app/hooks/use-timeout-ref-cleanup.js";
 import {
   NOVEL_CHARACTER_ASSET_SCHEMA,
   NOVEL_PROP_ASSET_SCHEMA,

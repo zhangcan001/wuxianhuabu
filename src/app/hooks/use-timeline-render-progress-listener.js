@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 import {
   handleTimelineRenderEvent,
-} from "../realtime-feedback-helpers.js";
+} from "../../realtime-feedback-helpers.js";
 
 export function useTimelineRenderProgressListener({
   isRuntimeAvailable = () => false,
