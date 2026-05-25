@@ -4,6 +4,7 @@ export const DEBUG_TRACE_KEY = "wuxianhuabu.debugTrace.v1";
 export const NOVEL_API_SETTINGS_KEY = "wuxianhuabu.novelFactoryApi.v1";
 export const API_KEY_VAULT_KEY = "wuxianhuabu.apiKeyVault.v1";
 export const ASSET_LIBRARY_KEY = "wuxianhuabu.assetLibrary.v1";
+export const ONBOARDING_STATE_KEY = "wuxianhuabu.onboarding.v1";
 export const API_BASE = "";
 export const PROJECT_CACHE_WRITE_DELAY_MS = 900;
 export const PROJECT_AUTOSAVE_DELAY_MS = 2000;

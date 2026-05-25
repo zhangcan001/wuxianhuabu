@@ -647,6 +647,7 @@ import {
   AUTOPILOT_MAX_ROUNDS,
   DEBUG_TRACE_KEY,
   NOVEL_API_SETTINGS_KEY,
+  ONBOARDING_STATE_KEY,
   PROJECT_AUTOSAVE_DELAY_MS,
   PROJECT_CACHE_WRITE_DELAY_MS,
   PROJECT_PATH_KEY,
@@ -667,6 +668,15 @@ import {
   getNextNodeIdValue,
   setNextNodeIdValue,
 } from "./app/node-id-counter.js";
+import { OnboardingWizard } from "./app/onboarding-wizard.jsx";
+import {
+  loadOnboardingState,
+  markOnboardingCompleted,
+  markOnboardingSkipped,
+  saveOnboardingState,
+  shouldShowOnboarding,
+} from "./app/onboarding-state.js";
+import { buildExampleProjectPayload, EXAMPLE_PROJECT_NEXT_NODE_ID } from "./app/example-project-payload.js";
 import "./styles.css";
 
 const {
@@ -746,6 +756,7 @@ function App() {
   const [showDashboard, setShowDashboard] = useState(false);
   const [showProjectStudio, setShowProjectStudio] = useState(true);
   const [showCompatibilityCanvas, setShowCompatibilityCanvas] = useState(false);
+  const [onboardingState, setOnboardingState] = useState(() => loadOnboardingState({ storage: localStorage, storageKey: ONBOARDING_STATE_KEY }));
   const [studioViewRequest, setStudioViewRequest] = useState({ view: "overview", token: 0 });
   const [showSimpleFlow, setShowSimpleFlow] = useState(false);
   const [hudCollapsed, setHudCollapsed] = useState(false);
@@ -6853,6 +6864,37 @@ async function runGenerationQueue() {
     positiveModulo,
   };
 
+  const showOnboardingWizard = shouldShowOnboarding(onboardingState, { hasProjectData: nodes.length > 0 });
+
+  function handleOnboardingComplete({ mode, settings: wizardSettings, loadExample }) {
+    if (wizardSettings && typeof wizardSettings === "object") {
+      setSettings((current) => ({ ...current, ...wizardSettings }));
+    }
+    if (loadExample) {
+      const payload = buildExampleProjectPayload();
+      const merged = { ...payload, settings: { ...(initialProject.settings || {}), ...(payload.settings || {}), ...(wizardSettings || {}) } };
+      const project = normalizeProject(merged);
+      setNodes(project.nodes);
+      setEdges(project.edges);
+      setView(project.view);
+      setEpisodes(project.episodes);
+      setActiveEpisodeId(project.activeEpisodeId);
+      setNextNodeIdValue(EXAMPLE_PROJECT_NEXT_NODE_ID);
+      setProjectMessage("已加载示例项目「雪夜灯下」。可以试试在分镜表里点'生成图片'。");
+    } else {
+      setProjectMessage("已应用初始设置，开始创作吧。");
+    }
+    const next = markOnboardingCompleted(onboardingState, { mode, loadedExample: Boolean(loadExample) });
+    setOnboardingState(next);
+    saveOnboardingState(next, { storage: localStorage, storageKey: ONBOARDING_STATE_KEY });
+  }
+
+  function handleOnboardingSkip() {
+    const next = markOnboardingSkipped(onboardingState);
+    setOnboardingState(next);
+    saveOnboardingState(next, { storage: localStorage, storageKey: ONBOARDING_STATE_KEY });
+  }
+
   return (
     <main
       className={`app ${pan ? "is-panning" : ""} ${showCompatibilityCanvas ? "compat-canvas-open" : "production-primary"} perf-${performanceProfile}`}
@@ -6865,6 +6907,9 @@ async function runGenerationQueue() {
       onPointerUp={showCompatibilityCanvas ? endPointer : undefined}
       onPointerLeave={showCompatibilityCanvas ? endPointer : undefined}
     >
+      {showOnboardingWizard && (
+        <OnboardingWizard onComplete={handleOnboardingComplete} onSkip={handleOnboardingSkip} />
+      )}
       {showCompatibilityCanvas && (
         <Suspense fallback={<PanelLoadingFallback label="正在打开兼容画布" />}>
           <LazyLegacyCanvasOverlay
