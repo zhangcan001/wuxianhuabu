@@ -15,6 +15,14 @@ const productionViews = [
   ["delivery", "交付"],
 ];
 
+const workflowSteps = [
+  { key: "script", label: "写小说", hint: "粘贴或生成文本方案" },
+  { key: "shots", label: "生分镜", hint: "解析为镜头表" },
+  { key: "media", label: "出图出视频", hint: "批量生成媒体" },
+  { key: "timeline", label: "时间线", hint: "装配镜头" },
+  { key: "delivery", label: "交付", hint: "导出成片" },
+];
+
 const advancedActions = [
   ["openAdvancedCanvas", "兼容画布"],
   ["openPromptFactory", "Prompt 工厂"],
@@ -43,6 +51,46 @@ export function ProjectTopbar({ title = "", episodeTitle = "", running = false, 
         <button className="primary" onClick={actions.openExport}>交付导出</button>
       </div>
     </header>
+  );
+}
+
+export function ProjectWorkflowStepper({ activeView = "overview", progress = {}, onNavigate }) {
+  const stepCount = workflowSteps.length;
+  const completedCount = workflowSteps.reduce((count, step) => count + (progress[step.key] ? 1 : 0), 0);
+  return (
+    <nav className="workflow-stepper" aria-label="生产流程">
+      <ol>
+        {workflowSteps.map((step, index) => {
+          const done = Boolean(progress[step.key]);
+          const isActive = activeView === step.key;
+          const reachable = done || isActive || index === 0 || progress[workflowSteps[index - 1]?.key];
+          const className = [
+            "workflow-step",
+            done ? "is-done" : "",
+            isActive ? "is-active" : "",
+            reachable ? "" : "is-locked",
+          ].filter(Boolean).join(" ");
+          return (
+            <li key={step.key}>
+              <button
+                type="button"
+                className={className}
+                onClick={() => onNavigate?.(step.key)}
+                title={step.hint}
+              >
+                <span className="workflow-step-num" aria-hidden="true">{done ? "✓" : index + 1}</span>
+                <span className="workflow-step-body">
+                  <span className="workflow-step-label">{step.label}</span>
+                  <span className="workflow-step-hint">{step.hint}</span>
+                </span>
+              </button>
+              {index < stepCount - 1 ? <span className="workflow-step-sep" aria-hidden="true" /> : null}
+            </li>
+          );
+        })}
+      </ol>
+      <span className="workflow-stepper-count">{completedCount}/{stepCount}</span>
+    </nav>
   );
 }
 

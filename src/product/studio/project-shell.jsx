@@ -4,6 +4,7 @@ import {
   ProjectInspector,
   ProjectSidebar,
   ProjectTopbar,
+  ProjectWorkflowStepper,
 } from "./project-chrome.jsx";
 import {
   AssetLibraryPanel,
@@ -129,6 +130,13 @@ export function ProjectShell({
     },
   }), [actions]);
   const mediaStats = useMemo(() => summarizeMedia(shotRows), [shotRows]);
+  const workflowProgress = useMemo(() => ({
+    script: Boolean(String(sourceText || "").trim()),
+    shots: shotRows.length > 0,
+    media: shotRows.some((shot) => shot.imageUrl || shot.videoUrl),
+    timeline: Array.isArray(timeline?.clips) && timeline.clips.length > 0,
+    delivery: Array.isArray(exportHistory) && exportHistory.length > 0,
+  }), [sourceText, shotRows, timeline, exportHistory]);
   const businessOptimizationBoard = useMemo(() => buildBusinessOptimizationBoard({
     sourceText,
     shots: shotRows,
@@ -163,6 +171,7 @@ export function ProjectShell({
       onContextMenu={(event) => event.stopPropagation()}
     >
       <ProjectTopbar title={title} episodeTitle={episodeTitle} running={running} actions={studioActions} />
+      <ProjectWorkflowStepper activeView={activeView} progress={workflowProgress} onNavigate={setActiveView} />
       <ProjectSidebar activeView={activeView} setActiveView={setActiveView} actions={studioActions} />
 
       <main className="product-workbench">

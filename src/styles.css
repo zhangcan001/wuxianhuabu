@@ -657,7 +657,7 @@ button:disabled::after {
   z-index: 90;
   display: grid;
   grid-template-columns: 196px minmax(0, 1fr) 318px;
-  grid-template-rows: 62px minmax(0, 1fr);
+  grid-template-rows: 62px auto minmax(0, 1fr);
   background:
     radial-gradient(circle at 28% 0%, rgba(59, 130, 246, 0.16), transparent 34%),
     linear-gradient(135deg, #080b10 0%, #101219 46%, #07090d 100%);
@@ -719,6 +719,126 @@ button:disabled::after {
   border-bottom: 1px solid rgba(148, 163, 184, 0.16);
   background: rgba(6, 9, 14, 0.9);
   backdrop-filter: blur(14px);
+}
+
+.workflow-stepper {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: linear-gradient(180deg, rgba(11, 14, 22, 0.78), rgba(8, 11, 18, 0.92));
+  backdrop-filter: blur(10px);
+}
+
+.workflow-stepper ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.workflow-stepper ol li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.workflow-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 38px !important;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+}
+
+.workflow-step:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.workflow-step:active {
+  transform: scale(0.98);
+}
+
+.workflow-step.is-active {
+  background: linear-gradient(135deg, rgba(124, 140, 255, 0.22), rgba(180, 140, 255, 0.14));
+  border-color: rgba(160, 170, 255, 0.55);
+  color: rgba(245, 247, 255, 0.96);
+  box-shadow: 0 6px 18px rgba(124, 140, 255, 0.22);
+}
+
+.workflow-step.is-done .workflow-step-num {
+  background: linear-gradient(135deg, #4ade80, #22d3ee);
+  border-color: transparent;
+  color: #062417;
+}
+
+.workflow-step.is-locked {
+  opacity: 0.55;
+}
+
+.workflow-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  flex-shrink: 0;
+}
+
+.workflow-step-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
+.workflow-step-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.workflow-step-hint {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.01em;
+}
+
+.workflow-step-sep {
+  width: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.16), transparent);
+  flex-shrink: 0;
+}
+
+.workflow-stepper-count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  padding-left: 4px;
+  flex-shrink: 0;
 }
 
 .product-brand {
@@ -801,7 +921,7 @@ button:disabled::after {
 }
 
 .product-sidebar {
-  grid-row: 2;
+  grid-row: 3;
   display: grid;
   align-content: space-between;
   gap: 16px;
@@ -836,7 +956,7 @@ button:disabled::after {
 }
 
 .product-workbench {
-  grid-row: 2;
+  grid-row: 3;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
   gap: 12px;
@@ -1401,7 +1521,7 @@ button:disabled::after {
 }
 
 .product-inspector {
-  grid-row: 2;
+  grid-row: 3;
   display: grid;
   align-content: start;
   gap: 12px;
