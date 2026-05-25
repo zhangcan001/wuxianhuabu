@@ -61,6 +61,7 @@ export function ProjectStudio({
   queueCounts = null,
   onSmartContinue,
   smartContinueHint = "",
+  autoSaveState = "",
 }) {
   const studioActions = useMemo(() => resolveStudioActions({
     actions,
@@ -448,6 +449,7 @@ export function ProjectStudio({
       queueCounts={queueCounts}
       onSmartContinue={onSmartContinue}
       smartContinueHint={smartContinueHint}
+      autoSaveState={autoSaveState}
       queueStatus={queueRunning ? "队列运行中" : queueStats.failed ? "有失败任务待处理" : queueStats.pending ? "任务等待运行" : "空闲"}
       queue={queue}
       nextActions={productionDashboard?.nextActions || []}

@@ -100,6 +100,7 @@ export function ProjectShell({
   queueCounts = null,
   onSmartContinue,
   smartContinueHint = "",
+  autoSaveState = "",
 }) {
   const [activeView, setActiveView] = useState("overview");
   const [imagePreview, setImagePreview] = useState(null);
@@ -184,6 +185,7 @@ export function ProjectShell({
         queueCounts={queueCounts}
         onSmartContinue={onSmartContinue}
         smartContinueHint={smartContinueHint}
+        autoSaveState={autoSaveState}
       />
       <ProjectWorkflowStepper activeView={activeView} progress={workflowProgress} onNavigate={setActiveView} />
       <ProjectSidebar activeView={activeView} setActiveView={setActiveView} actions={studioActions} />

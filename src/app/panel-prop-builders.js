@@ -29,5 +29,6 @@ export function buildProjectStudioProps(input = {}) {
     queueCounts: input.queueCounts || null,
     onSmartContinue: input.onSmartContinue,
     smartContinueHint: input.smartContinueHint || "",
+    autoSaveState: input.autoSaveState || "",
   };
 }

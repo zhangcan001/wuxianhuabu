@@ -36,6 +36,7 @@ export function ProjectTopbar({
   queueCounts = null,
   onSmartContinue,
   smartContinueHint = "",
+  autoSaveState = "",
 }) {
   const channel = import.meta.env.DEV ? "开发版" : import.meta.env.VITE_APP_CHANNEL;
   const version = import.meta.env.VITE_APP_VERSION;
@@ -43,6 +44,12 @@ export function ProjectTopbar({
   const hasWorkspaces = Array.isArray(workspaces) && workspaces.length > 0;
   const imageQueue = queueCounts?.image || 0;
   const videoQueue = queueCounts?.video || 0;
+  const saveStatus = (() => {
+    if (!autoSaveState) return null;
+    if (autoSaveState.startsWith("已自动保存")) return { tone: "ok", icon: "✓", text: autoSaveState };
+    if (autoSaveState.startsWith("自动保存失败")) return { tone: "err", icon: "!", text: autoSaveState };
+    return { tone: "pending", icon: "…", text: autoSaveState };
+  })();
   return (
     <header className="product-topbar">
       <div className="product-brand">
@@ -96,6 +103,16 @@ export function ProjectTopbar({
             <span className="topbar-queue-breakdown">图 {imageQueue} · 视 {videoQueue}</span>
           </button>
         ) : null}
+        {saveStatus ? (
+          <span
+            className={`topbar-save-pill is-${saveStatus.tone}`}
+            title={saveStatus.text}
+            aria-label={saveStatus.text}
+          >
+            <span className="topbar-save-pill-icon" aria-hidden="true">{saveStatus.icon}</span>
+            <span className="topbar-save-pill-text">{saveStatus.text}</span>
+          </span>
+        ) : null}
       </div>
       <div className="product-topbar-actions">
         {onSmartContinue ? (
@@ -121,6 +138,26 @@ export function ProjectTopbar({
 export function ProjectWorkflowStepper({ activeView = "overview", progress = {}, onNavigate }) {
   const stepCount = workflowSteps.length;
   const completedCount = workflowSteps.reduce((count, step) => count + (progress[step.key] ? 1 : 0), 0);
+  const previousProgress = useRef({});
+  const [justCompleted, setJustCompleted] = useState({});
+  useEffect(() => {
+    const prev = previousProgress.current;
+    const newlyDone = {};
+    workflowSteps.forEach((step) => {
+      if (progress[step.key] && !prev[step.key]) newlyDone[step.key] = true;
+    });
+    previousProgress.current = { ...progress };
+    if (Object.keys(newlyDone).length === 0) return;
+    setJustCompleted((current) => ({ ...current, ...newlyDone }));
+    const timer = window.setTimeout(() => {
+      setJustCompleted((current) => {
+        const next = { ...current };
+        Object.keys(newlyDone).forEach((key) => { delete next[key]; });
+        return next;
+      });
+    }, 720);
+    return () => window.clearTimeout(timer);
+  }, [progress]);
   return (
     <nav className="workflow-stepper" aria-label="生产流程">
       <ol>
@@ -133,6 +170,7 @@ export function ProjectWorkflowStepper({ activeView = "overview", progress = {},
             done ? "is-done" : "",
             isActive ? "is-active" : "",
             reachable ? "" : "is-locked",
+            justCompleted[step.key] ? "is-just-done" : "",
           ].filter(Boolean).join(" ");
           return (
             <li key={step.key}>

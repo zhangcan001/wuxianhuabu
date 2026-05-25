@@ -218,6 +218,9 @@ import {
   useTimeoutRefCleanup,
 } from "./app/hooks/use-timeout-ref-cleanup.js";
 import {
+  useMarqueeMode,
+} from "./app/hooks/use-marquee-mode.js";
+import {
   NOVEL_CHARACTER_ASSET_SCHEMA,
   NOVEL_PROP_ASSET_SCHEMA,
   NOVEL_SCENE_ASSET_SCHEMA,
@@ -779,7 +782,7 @@ function App() {
   const [healthFixingKeys, setHealthFixingKeys] = useState([]);
   const [healthRepairLog, setHealthRepairLog] = useState([]);
   const [healthRemainingKeys, setHealthRemainingKeys] = useState([]);
-  const [marqueeMode, setMarqueeMode] = useState(false);
+  const { marqueeMode, setMarqueeMode, toggleMarqueeMode } = useMarqueeMode(false);
   const [showPromptFactory, setShowPromptFactory] = useState(false);
   const [showTemplateCenter, setShowTemplateCenter] = useState(false);
   const [showStylePresetCenter, setShowStylePresetCenter] = useState(false);
@@ -7049,6 +7052,7 @@ async function runGenerationQueue() {
             smartContinueHint: workflowNavigator?.nextStage?.label
               ? `下一步：${workflowNavigator.nextStage.label}`
               : "按当前生产进度推进下一步",
+            autoSaveState,
           })} />
         </Suspense>
       )}
@@ -7100,7 +7104,7 @@ async function runGenerationQueue() {
               <div className="hud-group">
                 <button
                   className={marqueeMode ? "active" : ""}
-                  onClick={() => setMarqueeMode((value) => !value)}
+                  onClick={toggleMarqueeMode}
                   title="打开后，左键拖拽画布即框选节点"
                 >
                   {marqueeMode ? "框选模式 开" : "框选模式 关"}
