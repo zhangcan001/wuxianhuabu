@@ -1,18 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  executeRiskAction,
-  riskActionLabel,
-} from "./risk-action-helpers.js";
 
 const productionViews = [
   ["overview", "总览"],
-  ["script", "剧本方案"],
-  ["shots", "镜头表"],
   ["assets", "资产库"],
-  ["media", "媒体生产"],
-  ["timeline", "时间线"],
   ["review", "审片"],
-  ["delivery", "交付"],
 ];
 
 const workflowSteps = [
@@ -61,7 +52,7 @@ export function ProjectTopbar({
             {channel} v{version}
           </span>
         </div>
-        <span>{episodeTitle} · Production OS</span>
+        <span>Production OS</span>
       </div>
       <div className="product-topbar-context">
         {hasEpisodes ? (
@@ -256,20 +247,19 @@ export function ProjectInspector({
 
       <section>
         <div className="panel-title">
-          <strong>下一步</strong>
-          <span>{riskReport?.openCount ? `${riskReport.openCount} 项风险` : businessOptimizationBoard?.open ? `${businessOptimizationBoard.open} 项待优化` : running ? "处理中" : "可执行"}</span>
+          <strong>已发现的阻塞 / 风险</strong>
+          <span>{riskReport?.openCount ? `${riskReport.openCount} 项风险` : businessOptimizationBoard?.open ? `${businessOptimizationBoard.open} 项待优化` : running ? "处理中" : "无阻塞"}</span>
         </div>
         <div className="next-actions">
           {riskReport?.topRisks?.length ? riskReport.topRisks.slice(0, 4).map((item) => (
             <p key={item.key}>
               <b>{item.title}</b><br />{item.action}
-              <button type="button" onClick={() => executeRiskAction(item, actions)}>{riskActionLabel(item)}</button>
             </p>
           )) : businessOptimizationBoard?.topItems?.length ? businessOptimizationBoard.topItems.slice(0, 4).map((item) => (
             <p key={item.key}><b>{item.title}</b><br />{item.action}<br /><small>{item.progress}% · {item.blockers?.[0] || item.detail}</small></p>
           )) : nextActions.length ? nextActions.slice(0, 4).map((item, index) => (
             <p key={`${item.label}-${index}`}>{item.label}</p>
-          )) : <p>暂无阻塞，当前生产线可继续推进。</p>}
+          )) : <p>暂无阻塞，请使用 Topbar 的「智能继续」按钮推进。</p>}
         </div>
       </section>
 

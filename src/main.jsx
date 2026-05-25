@@ -7064,28 +7064,6 @@ async function runGenerationQueue() {
           <button onClick={() => setHudVisible(false)} title="关闭工具浮条">✕</button>
         </div>
         {!hudCollapsed && (
-          <div className="hud-workflow-strip">
-            <div className="hud-workflow-head">
-              <strong>流程 {workflowNavigator.progress}%</strong>
-              <span>下一步：{workflowNavigator.nextStage?.label || "完成"} · {workflowNavigator.nextStage?.detail || "暂无阻塞"}</span>
-            </div>
-            <div className="hud-workflow-steps">
-              {workflowNavigator.stages.map((stage) => (
-                <button key={stage.key} className={stage.done ? "done" : stage.key === workflowNavigator.nextStage?.key ? "active" : ""} onClick={() => guideWorkflowStep(stage.key)}>
-                  <span>{stage.label}</span>
-                </button>
-              ))}
-            </div>
-            <div className="hud-workflow-actions">
-              <button className="primary" onClick={() => continueWorkflowFromDashboard()}>智能继续</button>
-              <button onClick={() => guideWorkflowStep(workflowNavigator.nextStage?.key || "video")}>打开当前工位</button>
-              {workflowNavigator.blockers.length ? workflowNavigator.blockers.map((item, index) => (
-                <span key={`${item.label}-${index}`} className={`pill ${item.tone === "danger" ? "timeline-pill-danger" : "pill-warn"}`}>{item.label}</span>
-              )) : <span className="pill pill-ok">当前阶段无明显阻塞</span>}
-            </div>
-          </div>
-        )}
-        {!hudCollapsed && (
           <div className="hud-actions">
             <div className="hud-group">
               <button onClick={() => setShowQueue(true)}>图片生成队列 {generationQueue.filter((job) => job.kind === "image").length}</button>

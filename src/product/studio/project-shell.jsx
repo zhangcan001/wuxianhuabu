@@ -160,18 +160,6 @@ export function ProjectShell({
     multiEpisodeDeliverySummary,
   }), [sourceText, shotRows, assetRows, timeline, queue, exportHistory, providerHealthReport, riskReport, multiEpisodeDeliverySummary]);
   const featuredShot = shotRows.find((shot) => shot.imageUrl) || shotRows[0] || null;
-  const runPrimaryAction = () => {
-    const key = primaryAction?.key;
-    if (key === "script") return setActiveView("script");
-    if (key === "text") return runStage?.(stages.find((stage) => stage.key === "text"));
-    if (key === "image") return studioActions.generateImages?.();
-    if (key === "video") return studioActions.generateVideos?.();
-    if (key === "syncTimeline") return studioActions.syncTimelineFromShots?.();
-    if (key === "review") return studioActions.runReview?.();
-    if (key === "delivery") return studioActions.openExport?.();
-    if (key === "repairAssetConsistency") return studioActions.repairAssetConsistency?.();
-    return null;
-  };
 
   return (
     <section
@@ -206,12 +194,6 @@ export function ProjectShell({
             <span className="workbench-kicker">当前阶段</span>
             <h1>{heroTitle || activeStage.title || "准备生产"}</h1>
             <p>{heroDetail || activeStage.detail || "按生产线推进文本、图片、视频、审片和交付。"}</p>
-            {primaryAction ? (
-              <button type="button" className="workbench-primary-action" disabled={primaryAction.disabled} onClick={runPrimaryAction}>
-                <strong>{primaryAction.label}</strong>
-                <span>{primaryAction.detail}</span>
-              </button>
-            ) : null}
           </div>
           <figure className="workbench-visual">
             {featuredShot?.imageUrl ? (
@@ -236,8 +218,26 @@ export function ProjectShell({
             </figcaption>
           </figure>
           <div className="workbench-progress">
-            <strong>{progress}%</strong>
-            <span>{completedStages}/{stages.length || 4} 阶段</span>
+            {(() => {
+              const costMetric = metrics.find((item) => /预估/.test(item.label || ""));
+              const deliveredMetric = metrics.find((item) => item.label === "失败" || item.label === "可执行") || null;
+              if (costMetric) {
+                return <>
+                  <strong>{costMetric.value}</strong>
+                  <span>{costMetric.label}</span>
+                </>;
+              }
+              if (deliveredMetric) {
+                return <>
+                  <strong>{deliveredMetric.value}</strong>
+                  <span>{deliveredMetric.label}</span>
+                </>;
+              }
+              return <>
+                <strong>{completedStages}/{stages.length || 4}</strong>
+                <span>阶段</span>
+              </>;
+            })()}
           </div>
         </section>
 
