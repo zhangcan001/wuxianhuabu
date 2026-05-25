@@ -5,7 +5,12 @@ export const DEFAULT_BUNDLE_BUDGETS = [
   { pattern: /^dist\/assets\/three-.*\.js$/, maxKb: 780 },
   { pattern: /^dist\/assets\/index-.*\.css$/, maxKb: 145, required: true },
   { pattern: /^dist\/assets\/project-studio-.*\.js$/, maxKb: 110, required: true },
-  { pattern: /^dist\/assets\/workspace-panels-.*\.js$/, maxKb: 120, required: true },
+  { pattern: /^dist\/assets\/panel-dashboard-.*\.js$/, maxKb: 80, required: true },
+  { pattern: /^dist\/assets\/panel-export-center-.*\.js$/, maxKb: 50, required: true },
+  { pattern: /^dist\/assets\/panel-timeline-.*\.js$/, maxKb: 45, required: true },
+  { pattern: /^dist\/assets\/panel-simple-workflow-.*\.js$/, maxKb: 25, required: true },
+  { pattern: /^dist\/assets\/panel-generation-queue-.*\.js$/, maxKb: 25, required: true },
+  { pattern: /^dist\/assets\/panel-ops-.*\.js$/, maxKb: 30, required: true },
 ];
 
 export function checkBundleBudgets(files = collectBundleAssets(), budgets = DEFAULT_BUNDLE_BUDGETS) {

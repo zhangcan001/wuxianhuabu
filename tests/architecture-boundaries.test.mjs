@@ -426,7 +426,7 @@ test("release and migration guardrails stay wired", () => {
   assert.match(releaseSafety, /versions: "synced"/);
   assert.match(releaseSafety, /nsis: "configured"/);
   assert.match(bundleBudget, /project-studio/);
-  assert.match(bundleBudget, /workspace-panels/);
+  assert.match(bundleBudget, /panel-dashboard/);
   assert.match(smokePreview, /--strictPort/);
   assert.match(desktopSmoke, /wuxianhuabu\.exe/);
   assert.match(desktopSmoke, /x64-setup\.exe/);

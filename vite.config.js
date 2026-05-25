@@ -8,7 +8,12 @@ const VENDOR_CHUNK_PATTERNS = [
 ];
 
 const SOURCE_CHUNK_PATTERNS = [
-  [/[\\/]src[\\/]lazy-panels\.jsx$/, "workspace-panels"],
+  [/[\\/]src[\\/]panels[\\/]project-dashboard-panel\.jsx$/, "panel-dashboard"],
+  [/[\\/]src[\\/]panels[\\/]export-center-panel\.jsx$/, "panel-export-center"],
+  [/[\\/]src[\\/]panels[\\/]timeline-panel\.jsx$/, "panel-timeline"],
+  [/[\\/]src[\\/]panels[\\/]simple-workflow-panel\.jsx$/, "panel-simple-workflow"],
+  [/[\\/]src[\\/]panels[\\/]generation-queue-panel\.jsx$/, "panel-generation-queue"],
+  [/[\\/]src[\\/]panels[\\/](project-health|production-hub|archive-center)-panel\.jsx$/, "panel-ops"],
   [/[\\/]src[\\/]management-panels\.jsx$/, "management-panels"],
   [/[\\/]src[\\/]utility-panels\.jsx$/, "utility-panels"],
   [/[\\/]src[\\/]app[\\/]novel-factory-config\.js$/, "novel-factory-config"],

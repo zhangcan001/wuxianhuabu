@@ -42,15 +42,15 @@ export class UiErrorBoundary extends React.Component {
   }
 }
 
-export const LazyProjectDashboardPanel = lazyNamed(() => import("../lazy-panels.jsx"), "ProjectDashboardPanel");
+export const LazyProjectDashboardPanel = lazyNamed(() => import("../panels/project-dashboard-panel.jsx"), "ProjectDashboardPanel");
 export const LazyProjectStudio = lazyNamed(() => import("../project-studio.jsx"), "ProjectStudio");
-export const LazySimpleWorkflowPanel = lazyNamed(() => import("../lazy-panels.jsx"), "SimpleWorkflowPanel");
-export const LazyGenerationQueuePanel = lazyNamed(() => import("../lazy-panels.jsx"), "GenerationQueuePanel");
-export const LazyTimelinePanel = lazyNamed(() => import("../lazy-panels.jsx"), "TimelinePanel");
-export const LazyProjectHealthPanel = lazyNamed(() => import("../lazy-panels.jsx"), "ProjectHealthPanel");
-export const LazyProductionHubPanel = lazyNamed(() => import("../lazy-panels.jsx"), "ProductionHubPanel");
-export const LazyArchiveCenterPanel = lazyNamed(() => import("../lazy-panels.jsx"), "ArchiveCenterPanel");
-export const LazyExportCenterPanel = lazyNamed(() => import("../lazy-panels.jsx"), "ExportCenterPanel");
+export const LazySimpleWorkflowPanel = lazyNamed(() => import("../panels/simple-workflow-panel.jsx"), "SimpleWorkflowPanel");
+export const LazyGenerationQueuePanel = lazyNamed(() => import("../panels/generation-queue-panel.jsx"), "GenerationQueuePanel");
+export const LazyTimelinePanel = lazyNamed(() => import("../panels/timeline-panel.jsx"), "TimelinePanel");
+export const LazyProjectHealthPanel = lazyNamed(() => import("../panels/project-health-panel.jsx"), "ProjectHealthPanel");
+export const LazyProductionHubPanel = lazyNamed(() => import("../panels/production-hub-panel.jsx"), "ProductionHubPanel");
+export const LazyArchiveCenterPanel = lazyNamed(() => import("../panels/archive-center-panel.jsx"), "ArchiveCenterPanel");
+export const LazyExportCenterPanel = lazyNamed(() => import("../panels/export-center-panel.jsx"), "ExportCenterPanel");
 export const LazyPromptFactoryPanel = lazyNamed(() => import("../management-panels.jsx"), "PromptFactoryPanel");
 export const LazyTemplateCenterPanel = lazyNamed(() => import("../management-panels.jsx"), "TemplateCenterPanel");
 export const LazyStylePresetCenterPanel = lazyNamed(() => import("../management-panels.jsx"), "StylePresetCenterPanel");
