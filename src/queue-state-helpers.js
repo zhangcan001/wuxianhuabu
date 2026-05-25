@@ -108,6 +108,53 @@ export function markNextPendingJobRunning(queue, compareQueueJobs, { now = () =>
   };
 }
 
+export function switchQueueProvider(queue, jobIds, provider, { now = () => Date.now() } = {}) {
+  const ids = new Set((Array.isArray(jobIds) ? jobIds : []).filter(Boolean));
+  const trimmed = String(provider || "").trim();
+  if (!ids.size || !trimmed) return { queue, matched: 0 };
+  const providerMode = trimmed === "custom" ? "api" : trimmed;
+  const updatedAt = now();
+  let matched = 0;
+  const queueNext = (Array.isArray(queue) ? queue : []).map((job) => {
+    if (!ids.has(job.id)) return job;
+    matched += 1;
+    const isVideo = job.kind === "video" || job.type === "shot.video";
+    return {
+      ...job,
+      status: "pending",
+      error: "",
+      progress: null,
+      attempts: 0,
+      providerMode,
+      imageProviderMode: isVideo ? job.imageProviderMode : providerMode,
+      videoProviderMode: isVideo ? providerMode : job.videoProviderMode,
+      resultSummary: `已切换到 ${trimmed}，等待重试`,
+      updatedAt,
+    };
+  });
+  return { queue: matched ? queueNext : queue, matched, provider: trimmed };
+}
+
+export function skipQueueJobs(queue, jobIds, { now = () => Date.now() } = {}) {
+  const ids = new Set((Array.isArray(jobIds) ? jobIds : []).filter(Boolean));
+  if (!ids.size) return { queue, matched: 0 };
+  const updatedAt = now();
+  let matched = 0;
+  const queueNext = (Array.isArray(queue) ? queue : []).map((job) => {
+    if (!ids.has(job.id)) return job;
+    matched += 1;
+    return {
+      ...job,
+      status: "cancelled",
+      error: "",
+      progress: null,
+      resultSummary: "已跳过，等待手动补齐或重新排队",
+      updatedAt,
+    };
+  });
+  return { queue: matched ? queueNext : queue, matched };
+}
+
 export function markQueueJobDone(queue, jobId, resultSummary, { now = () => Date.now() } = {}) {
   const updatedAt = now();
   return (Array.isArray(queue) ? queue : []).map((job) => (

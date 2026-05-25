@@ -330,6 +330,8 @@ import {
   retryFailedShotJobsAction,
   retryQueueJobAction,
   retryQueueJobsAction,
+  retryQueueJobsWithProviderAction,
+  skipQueueJobsAction,
 } from "./app/project-queue-actions.js";
 import {
   createRuntimeProjectRepository,
@@ -4006,56 +4008,21 @@ function retryQueueJob(jobId) {
   }
 
   function retryQueueJobsWithProvider(jobIds = [], providerMode = "") {
-    const ids = Array.from(new Set((Array.isArray(jobIds) ? jobIds : [jobIds]).filter(Boolean)));
-    const provider = String(providerMode || "").trim();
-    if (!ids.length || !provider) {
-      setProjectMessage("没有可切换 Provider 的失败任务。");
-      return { matched: 0 };
-    }
-    let matched = 0;
-    setGenerationQueue((current) => current.map((job) => {
-      if (!ids.includes(job.id)) return job;
-      matched += 1;
-      const isVideo = job.kind === "video" || job.type === "shot.video";
-      return {
-        ...job,
-        status: "pending",
-        error: "",
-        progress: null,
-        attempts: 0,
-        providerMode: provider === "custom" ? "api" : provider,
-        imageProviderMode: isVideo ? job.imageProviderMode : provider,
-        videoProviderMode: isVideo ? provider : job.videoProviderMode,
-        resultSummary: `已切换到 ${provider}，等待重试`,
-        updatedAt: Date.now(),
-      };
-    }));
-    setShowQueue(true);
-    setProjectMessage(matched ? `已切换并重试 ${matched} 个任务：${provider}` : "没有找到可切换的任务。");
-    return { matched };
+    return retryQueueJobsWithProviderAction({
+      jobIds,
+      providerMode,
+      setGenerationQueue,
+      setShowQueue,
+      setProjectMessage,
+    });
   }
 
   function skipQueueJobs(jobIds = []) {
-    const ids = Array.from(new Set((Array.isArray(jobIds) ? jobIds : [jobIds]).filter(Boolean)));
-    if (!ids.length) {
-      setProjectMessage("没有可跳过的任务。");
-      return { matched: 0 };
-    }
-    let matched = 0;
-    setGenerationQueue((current) => current.map((job) => {
-      if (!ids.includes(job.id)) return job;
-      matched += 1;
-      return {
-        ...job,
-        status: "cancelled",
-        error: "",
-        progress: null,
-        resultSummary: "已跳过，等待手动补齐或重新排队",
-        updatedAt: Date.now(),
-      };
-    }));
-    setProjectMessage(matched ? `已跳过 ${matched} 个任务` : "没有找到可跳过的任务。");
-    return { matched };
+    return skipQueueJobsAction({
+      jobIds,
+      setGenerationQueue,
+      setProjectMessage,
+    });
   }
 
   function updateStudioShotPrompt(shot = {}, patch = {}) {

@@ -4,6 +4,8 @@ import {
   reprioritizeQueueJobState,
   retryFailedJobsState,
   retryQueueJobState,
+  skipQueueJobs as skipQueueJobsState,
+  switchQueueProvider,
 } from "../queue-state-helpers.js";
 
 export function clearFinishedQueueJobs(queue = []) {
@@ -94,6 +96,45 @@ export function reprioritizeJobAction({
   setGenerationQueue = () => {},
 } = {}) {
   setGenerationQueue((current) => reprioritizeQueueJobState(current, jobId, priority));
+}
+
+export function retryQueueJobsWithProviderAction({
+  jobIds = [],
+  providerMode = "",
+  setGenerationQueue = () => {},
+  setShowQueue = () => {},
+  setProjectMessage = () => {},
+} = {}) {
+  let matched = 0;
+  let provider = "";
+  setGenerationQueue((current) => {
+    const result = switchQueueProvider(current, jobIds, providerMode);
+    matched = result.matched;
+    provider = result.provider;
+    return result.queue;
+  });
+  if (!matched) {
+    setProjectMessage("没有可切换 Provider 的失败任务。");
+    return { matched: 0 };
+  }
+  setShowQueue(true);
+  setProjectMessage(`已切换并重试 ${matched} 个任务：${provider}`);
+  return { matched };
+}
+
+export function skipQueueJobsAction({
+  jobIds = [],
+  setGenerationQueue = () => {},
+  setProjectMessage = () => {},
+} = {}) {
+  let matched = 0;
+  setGenerationQueue((current) => {
+    const result = skipQueueJobsState(current, jobIds);
+    matched = result.matched;
+    return result.queue;
+  });
+  setProjectMessage(matched ? `已跳过 ${matched} 个任务` : "没有可跳过的任务。");
+  return { matched };
 }
 
 export function retryExportJobsAction({
