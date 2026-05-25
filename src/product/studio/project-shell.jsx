@@ -124,6 +124,9 @@ export function ProjectShell({
         title: payload.title || "点击空白处关闭高清预览",
       });
     },
+    navigateView: (view) => {
+      if (typeof view === "string" && view) setActiveView(view);
+    },
   }), [actions]);
   const mediaStats = useMemo(() => summarizeMedia(shotRows), [shotRows]);
   const businessOptimizationBoard = useMemo(() => buildBusinessOptimizationBoard({

@@ -158,7 +158,18 @@ export function ShotTablePanel({ shots = [], actions = {}, running = false, runn
             );
           })}
         </div>
-      ) : <EmptyPanel text="还没有镜头。先导入小说并生成文本方案。" />}
+      ) : (
+        <EmptyPanel
+          icon="🎬"
+          title="还没有镜头"
+          text="先在「小说工厂」里粘贴文本并生成分镜，所有镜头会自动列在这里。"
+          hint="提示：每行镜头都可以单独点'生图'、'生视频'，也支持批量。"
+          actions={[
+            { key: "go-script", label: "去小说工厂", primary: true, onClick: () => actions.navigateView?.("script") },
+            { key: "open-prompt", label: "编辑提示词模板", onClick: () => actions.openPromptFactory?.() },
+          ]}
+        />
+      )}
     </section>
   );
 }

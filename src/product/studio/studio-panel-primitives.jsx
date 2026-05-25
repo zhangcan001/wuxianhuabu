@@ -62,8 +62,33 @@ export function InlineTaskStatus({ taskStatus = null, actions = {}, compact = fa
   );
 }
 
-export function EmptyPanel({ text = "" }) {
-  return <div className="empty-panel">{text}</div>;
+export function EmptyPanel({ text = "", icon = "", title = "", hint = "", actions = [] }) {
+  if (!icon && !title && !hint && !(actions && actions.length)) {
+    return <div className="empty-panel">{text}</div>;
+  }
+  return (
+    <div className="empty-panel empty-panel-guide">
+      {icon ? <div className="empty-panel-icon" aria-hidden="true">{icon}</div> : null}
+      {title ? <div className="empty-panel-title">{title}</div> : null}
+      {text ? <p className="empty-panel-text">{text}</p> : null}
+      {hint ? <p className="empty-panel-hint">{hint}</p> : null}
+      {actions && actions.length ? (
+        <div className="empty-panel-actions">
+          {actions.map((action, idx) => (
+            <button
+              key={action.key || action.label || idx}
+              type="button"
+              className={`empty-panel-btn${action.primary ? " is-primary" : ""}`}
+              onClick={action.onClick}
+              disabled={action.disabled}
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function AssetCandidateStrip({ asset = {}, actions = {} }) {

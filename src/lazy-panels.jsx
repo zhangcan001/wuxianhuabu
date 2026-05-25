@@ -1705,7 +1705,26 @@ export function GenerationQueuePanel({ jobs, running, onRun, onStop, onClear, on
               </div>
             </section>
           );
-          }) : <div className="asset-empty">当前筛选下暂无任务。</div>}
+          }) : (
+            <div className="empty-panel empty-panel-guide queue-empty-guide">
+              <div className="empty-panel-icon" aria-hidden="true">⚙️</div>
+              {jobs.length ? (
+                <>
+                  <div className="empty-panel-title">当前筛选下没有任务</div>
+                  <p className="empty-panel-text">切回「全部」就能看到所有任务，或换一个状态试试。</p>
+                  <div className="empty-panel-actions">
+                    <button type="button" className="empty-panel-btn is-primary" onClick={() => setFilter("全部")}>显示全部</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="empty-panel-title">队列还没接到活</div>
+                  <p className="empty-panel-text">去分镜表点「生图」「生视频」，任务会自动排进这里。</p>
+                  <p className="empty-panel-hint">导出视频、批量出图也都走这条队列。</p>
+                </>
+              )}
+            </div>
+          )}
       </div>
     </aside>
   ), document.body);

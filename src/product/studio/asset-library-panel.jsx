@@ -148,7 +148,18 @@ export function AssetLibraryPanel({ assets = [], resources = [], actions = {}, r
             );
           })}
         </div>
-      ) : <EmptyPanel text="还没有资产。先生成文本方案，系统会提取角色、场景和道具。" />}
+      ) : (
+        <EmptyPanel
+          icon="🎭"
+          title="资产库是空的"
+          text="先去「小说工厂」生成文本方案，系统会自动抽取角色、场景、道具。"
+          hint="也可以手动新增 — 不过先跑一遍流水线最省事。"
+          actions={[
+            { key: "go-script", label: "去小说工厂", primary: true, onClick: () => actions.navigateView?.("script") },
+            { key: "go-shots", label: "看分镜表", onClick: () => actions.navigateView?.("shots") },
+          ]}
+        />
+      )}
     </section>
   );
 }

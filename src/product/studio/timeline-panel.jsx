@@ -87,7 +87,18 @@ export function TimelinePanel({ shots = [], timeline = {}, stats = {}, actions =
               </div>
             ) : null}
           </article>
-        )) : <EmptyPanel text="还没有可装配的镜头。先生成文本方案。" />}
+        )) : (
+          <EmptyPanel
+            icon="🎞️"
+            title="时间线还是空的"
+            text="生成分镜后，点上面的「同步镜头到时间线」就能把镜头串起来。"
+            hint="同步后这里会出现可拖拽的片段条，每段都能改时长、加转场。"
+            actions={[
+              { key: "sync", label: "同步镜头到时间线", primary: true, onClick: () => actions.syncTimelineFromShots?.(), disabled: !shots.length },
+              { key: "go-shots", label: "先去分镜表看看", onClick: () => actions.navigateView?.("shots") },
+            ]}
+          />
+        )}
       </div>
       <div className="panel-actions">
         <button className="primary" onClick={actions.syncTimelineFromShots} disabled={!shots.length}>同步镜头到时间线</button>
