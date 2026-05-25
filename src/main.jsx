@@ -188,6 +188,9 @@ import {
   useGlobalApiConfigState,
 } from "./app/use-global-api-config-state.js";
 import {
+  useHudState,
+} from "./app/use-hud-state.js";
+import {
   useLatestRef,
 } from "./app/use-latest-ref.js";
 import {
@@ -759,9 +762,15 @@ function App() {
   const [onboardingState, setOnboardingState] = useState(() => loadOnboardingState({ storage: localStorage, storageKey: ONBOARDING_STATE_KEY }));
   const [studioViewRequest, setStudioViewRequest] = useState({ view: "overview", token: 0 });
   const [showSimpleFlow, setShowSimpleFlow] = useState(false);
-  const [hudCollapsed, setHudCollapsed] = useState(false);
-  const [hudDock, setHudDock] = useState("bottom");
-  const [hudVisible, setHudVisible] = useState(false);
+  const {
+    collapsed: hudCollapsed,
+    dock: hudDock,
+    visible: hudVisible,
+    toggleCollapsed: toggleHudCollapsed,
+    toggleDock: toggleHudDock,
+    toggleVisible: toggleHudVisible,
+    close: closeHud,
+  } = useHudState();
   const [promptPreview, setPromptPreview] = useState(null);
   const [showQueue, setShowQueue] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
@@ -7048,7 +7057,7 @@ async function runGenerationQueue() {
       <button
         type="button"
         className={`hud-toggle${hudVisible ? " is-open" : ""}`}
-        onClick={() => setHudVisible((value) => !value)}
+        onClick={toggleHudVisible}
         title={hudVisible ? "收起工具浮条" : "展开工具浮条"}
         aria-label={hudVisible ? "收起工具浮条" : "展开工具浮条"}
       >
@@ -7059,9 +7068,9 @@ async function runGenerationQueue() {
         <div className="hud-main">
           <strong>火山AI漫剧</strong>
           {!hudCollapsed && <span>{projectSummary.activeEpisode?.name || "当前集"} · {projectSummary.active.nodes} 节点 · {projectSummary.active.shots} 镜头</span>}
-          <button onClick={() => setHudCollapsed((value) => !value)}>{hudCollapsed ? "展开" : "收起"}</button>
-          <button onClick={() => setHudDock((value) => (value === "bottom" ? "top" : "bottom"))}>{hudDock === "bottom" ? "置顶" : "置底"}</button>
-          <button onClick={() => setHudVisible(false)} title="关闭工具浮条">✕</button>
+          <button onClick={toggleHudCollapsed}>{hudCollapsed ? "展开" : "收起"}</button>
+          <button onClick={toggleHudDock}>{hudDock === "bottom" ? "置顶" : "置底"}</button>
+          <button onClick={closeHud} title="关闭工具浮条">✕</button>
         </div>
         {!hudCollapsed && (
           <div className="hud-actions">
