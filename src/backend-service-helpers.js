@@ -680,7 +680,7 @@ export async function splitImageToFrames(imageUrl, rows, cols, deps = {}) {
     const result = await splitImageGridImpl({ imageUrl, rows, cols });
     return result.frames;
   }
-  const imageLoader = loadImageImpl || (await import("./panorama-helpers.js")).loadImage;
+  const imageLoader = loadImageImpl || (await import("./canvas/panorama-helpers.js")).loadImage;
   const image = await imageLoader(imageUrl);
   const frameWidth = Math.floor((image.naturalWidth || image.width) / cols);
   const frameHeight = Math.floor((image.naturalHeight || image.height) / rows);

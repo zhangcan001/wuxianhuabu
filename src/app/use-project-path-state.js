@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import {
   persistProjectPath,
-} from "../project-file-helpers.js";
+} from "../storage/project-file-helpers.js";
 
 export function useProjectPathState(storage, storageKey) {
   const [currentProjectPath, setCurrentProjectPath] = useState(() => storage?.getItem?.(storageKey) || "");

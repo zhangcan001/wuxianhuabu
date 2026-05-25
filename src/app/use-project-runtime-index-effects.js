@@ -9,7 +9,7 @@ import {
 } from "./project-index-actions.js";
 import {
   buildProjectIndexPayload,
-} from "../project-sqlite-index-helpers.js";
+} from "../storage/project-sqlite-index-helpers.js";
 
 const PROJECT_INDEX_WRITE_DELAY_MS = 1600;
 

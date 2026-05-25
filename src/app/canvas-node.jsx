@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { AssetTokenInsertRow, Counter, NodeHeader } from "../canvas-shared.jsx";
+import { AssetTokenInsertRow, Counter, NodeHeader } from "../canvas/canvas-shared.jsx";
 import {
   LazyAssetLibraryNode,
   LazyDirectorNode,

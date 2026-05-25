@@ -23,7 +23,7 @@ import {
   filterNodesInViewport,
   getNodeBounds,
   resolvePerformanceProfile,
-} from "./canvas-performance-helpers.js";
+} from "./canvas/canvas-performance-helpers.js";
 import {
   clamp,
   cssEscape,
@@ -33,7 +33,7 @@ import {
   positiveModulo,
   screenToWorld,
   worldToScreen,
-} from "./canvas-viewport-helpers.js";
+} from "./canvas/canvas-viewport-helpers.js";
 import {
   loadApiWorkspaceLibrary,
 } from "./api-workspace-library.js";
@@ -124,7 +124,7 @@ import {
   normalizeMannequin,
   normalizeMannequins,
   projectDirectorPoint,
-} from "./director-canvas-helpers.js";
+} from "./canvas/director-canvas-helpers.js";
 import {
   appendDraftShotsToList,
   applyResultToShotList,
@@ -132,7 +132,7 @@ import {
   buildPipelineSyncPayloads,
   buildTimelineSourceFromShotRecord,
   findNearestNodeInEpisode,
-} from "./canvas-action-helpers.js";
+} from "./canvas/canvas-action-helpers.js";
 import {
   materializeLegacyCanvasFromBusinessProject,
   mergeAdvancedCanvasProjection,
@@ -149,7 +149,7 @@ import {
   buildQueueShotSuccessPatch,
   buildTimelineShotPatchFromQueue,
   patchShotQueueState,
-} from "./canvas-queue-helpers.js";
+} from "./canvas/canvas-queue-helpers.js";
 import {
   normalizeGeminiWebNodeData,
   normalizeImageEditNodeData,
@@ -167,7 +167,7 @@ import {
   sanitizeSettingsForStorage,
   stringifyProjectStoragePayload,
   upsertExportHistoryEntry,
-} from "./project-storage-helpers.js";
+} from "./storage/project-storage-helpers.js";
 import {
   createGenerationJobs,
 } from "./queue-state-helpers.js";
@@ -235,10 +235,10 @@ import {
 } from "./project-report-helpers.js";
 import {
   hasSavedApiKey,
-} from "./storage-helpers.js";
+} from "./storage/storage-helpers.js";
 import {
   parseProjectContent,
-} from "./project-file-helpers.js";
+} from "./storage/project-file-helpers.js";
 import {
   computeRedoState,
   computeUndoState,
@@ -338,11 +338,11 @@ import {
 } from "./app/production-commands.js";
 import {
   migrateProjectEmbeddedImages,
-} from "./project-media-migration-helpers.js";
+} from "./storage/project-media-migration-helpers.js";
 import {
   buildMediaCacheCleanupReport,
   buildMediaCacheReport,
-} from "./project-media-index-helpers.js";
+} from "./storage/project-media-index-helpers.js";
 import {
   buildProjectResourceIndex,
   expandResourceReferences,

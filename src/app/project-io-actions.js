@@ -3,7 +3,7 @@ import {
   buildProjectSavedMessage,
   openProjectThroughRuntime,
   openRecentProjectPath,
-} from "../project-file-helpers.js";
+} from "../storage/project-file-helpers.js";
 import {
   buildAppliedProjectState,
 } from "../project-state-helpers.js";

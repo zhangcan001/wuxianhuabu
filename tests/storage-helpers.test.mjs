@@ -8,7 +8,7 @@ import {
   loadApiKeyVaultFromStorage,
   rememberApiKeyInVault,
   saveApiKeyVaultToStorage,
-} from "../src/storage-helpers.js";
+} from "../src/storage/storage-helpers.js";
 
 function memoryStorage(seed = {}) {
   const values = new Map(Object.entries(seed));

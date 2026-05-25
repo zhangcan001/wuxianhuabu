@@ -7,7 +7,7 @@ import {
   normalizeApiWorkspaceLibrary,
   saveApiWorkspaceLibrary,
 } from "./api-workspace-library.js";
-import { applyMediaCacheReviewDecisions, getMediaCacheFileKey } from "./project-media-index-helpers.js";
+import { applyMediaCacheReviewDecisions, getMediaCacheFileKey } from "./storage/project-media-index-helpers.js";
 
 const MEDIA_CACHE_REVIEW_KEY = "wuxianhuabu.mediaCacheReview.v1";
 const MEDIA_CACHE_DELETE_AUDIT_KEY = "wuxianhuabu.mediaCacheDeleteAudit.v1";

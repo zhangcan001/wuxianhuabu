@@ -5,7 +5,7 @@ import {
   filterNodesInViewport,
   getNodeBounds,
   resolvePerformanceProfile,
-} from "../src/canvas-performance-helpers.js";
+} from "../src/canvas/canvas-performance-helpers.js";
 
 test("canvas performance profile respects explicit modes and auto thresholds", () => {
   assert.equal(resolvePerformanceProfile({ mode: "quality" }, 999, 999, 9), "quality");

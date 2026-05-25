@@ -11,7 +11,7 @@ import {
   previewEdgePath,
   screenToWorld,
   worldToScreen,
-} from "../src/canvas-viewport-helpers.js";
+} from "../src/canvas/canvas-viewport-helpers.js";
 
 test("canvas viewport helpers convert coordinates both ways", () => {
   const view = { x: 20, y: -10, scale: 2 };

@@ -4,7 +4,7 @@ import {
   buildQueueResultSummary,
   buildQueueShotSuccessPatch,
   buildTimelineShotPatchFromQueue,
-} from "../canvas-queue-helpers.js";
+} from "../canvas/canvas-queue-helpers.js";
 import {
   createGenerationJobs,
   markNextPendingJobRunning,

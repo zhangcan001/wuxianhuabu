@@ -6,7 +6,7 @@ import {
   getVrGridPresets,
   positiveModulo,
   sampleNearest,
-} from "../src/panorama-helpers.js";
+} from "../src/canvas/panorama-helpers.js";
 
 function createFakeDocument() {
   return {

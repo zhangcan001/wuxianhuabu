@@ -4,7 +4,7 @@ import {
   buildQueueAssetSuccessPatch,
   buildQueueShotSuccessPatch,
   buildTimelineShotPatchFromQueue,
-} from "../src/canvas-queue-helpers.js";
+} from "../src/canvas/canvas-queue-helpers.js";
 
 test("queue success patch keeps display urls and persisted media paths separately", () => {
   const patch = buildQueueShotSuccessPatch(

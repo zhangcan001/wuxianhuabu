@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   applyResultToShotList,
   buildTimelineSourceFromShotRecord,
-} from "../src/canvas-action-helpers.js";
+} from "../src/canvas/canvas-action-helpers.js";
 
 const normalizeShotRecord = (shot, index = 0) => ({
   id: shot.id || `S${String(index + 1).padStart(2, "0")}`,

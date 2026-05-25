@@ -2,7 +2,7 @@ import React from "react";
 import {
   previewEdgePath,
   worldToScreen,
-} from "../canvas-viewport-helpers.js";
+} from "../canvas/canvas-viewport-helpers.js";
 import { CanvasNode } from "./canvas-node.jsx";
 
 export function LegacyCanvasOverlay({

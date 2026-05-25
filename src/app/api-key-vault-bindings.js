@@ -6,7 +6,7 @@ import {
   forgetApiKeyInVault,
   loadApiKeyVaultFromStorage,
   rememberApiKeyInVault,
-} from "../storage-helpers.js";
+} from "../storage/storage-helpers.js";
 
 export function loadApiKeyVault() {
   return loadApiKeyVaultFromStorage({ storage: localStorage, storageKey: API_KEY_VAULT_KEY, tauriRuntime: isTauriRuntime() });

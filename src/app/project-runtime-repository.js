@@ -1,7 +1,7 @@
 import {
   saveProjectCacheThroughRuntime,
   saveProjectThroughRuntime,
-} from "../project-file-helpers.js";
+} from "../storage/project-file-helpers.js";
 import {
   createProjectRepository,
 } from "./project-repository.js";

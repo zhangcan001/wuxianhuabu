@@ -1,6 +1,6 @@
 import {
   clamp,
-} from "../canvas-viewport-helpers.js";
+} from "../canvas/canvas-viewport-helpers.js";
 
 let threeModulePromise = null;
 let panoramaHelpersPromise = null;
@@ -11,7 +11,7 @@ async function loadThreeModule() {
 }
 
 async function loadPanoramaHelpers() {
-  if (!panoramaHelpersPromise) panoramaHelpersPromise = import("../panorama-helpers.js");
+  if (!panoramaHelpersPromise) panoramaHelpersPromise = import("../canvas/panorama-helpers.js");
   return panoramaHelpersPromise;
 }
 

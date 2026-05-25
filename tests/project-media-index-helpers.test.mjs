@@ -7,7 +7,7 @@ import {
   collectProjectMediaReferences,
   getMediaCacheFileKey,
   normalizeMediaPath,
-} from "../src/project-media-index-helpers.js";
+} from "../src/storage/project-media-index-helpers.js";
 
 test("normalizeMediaPath handles Windows paths and encoded asset urls", () => {
   assert.equal(

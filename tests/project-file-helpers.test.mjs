@@ -11,7 +11,7 @@ import {
   persistProjectPath,
   saveProjectCacheThroughRuntime,
   saveProjectThroughRuntime,
-} from "../src/project-file-helpers.js";
+} from "../src/storage/project-file-helpers.js";
 
 test("persist project path stores and clears local value", () => {
   const events = [];

@@ -9,7 +9,7 @@ import {
   sanitizeSettingsForStorage,
   stringifyProjectStoragePayload,
   upsertExportHistoryEntry,
-} from "../src/project-storage-helpers.js";
+} from "../src/storage/project-storage-helpers.js";
 
 const serializers = {
   resource: (resource, compact) => ({ id: resource.id, dataUrl: compact ? "" : resource.dataUrl }),

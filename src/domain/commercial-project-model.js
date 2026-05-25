@@ -1,4 +1,4 @@
-import { normalizeExportHistoryState } from "../project-storage-helpers.js";
+import { normalizeExportHistoryState } from "../storage/project-storage-helpers.js";
 import { normalizeTimelineState } from "../project-timeline-helpers.js";
 
 export function buildCommercialProjectModel(input = {}) {

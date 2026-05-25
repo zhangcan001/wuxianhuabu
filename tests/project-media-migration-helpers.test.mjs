@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   isEmbeddedImageUrl,
   migrateProjectEmbeddedImages,
-} from "../src/project-media-migration-helpers.js";
+} from "../src/storage/project-media-migration-helpers.js";
 
 test("embedded image detector only matches image data urls", () => {
   assert.equal(isEmbeddedImageUrl("data:image/png;base64,abc"), true);

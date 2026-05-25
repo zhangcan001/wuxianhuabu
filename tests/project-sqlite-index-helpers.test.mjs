@@ -8,7 +8,7 @@ import {
   buildShotIndexItems,
   buildTaskIndexItems,
   buildTimelineClipIndexItems,
-} from "../src/project-sqlite-index-helpers.js";
+} from "../src/storage/project-sqlite-index-helpers.js";
 
 test("buildResourceIndexItems keeps stable resource fields", () => {
   const items = buildResourceIndexItems([

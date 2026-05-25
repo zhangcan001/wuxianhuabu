@@ -13,7 +13,7 @@ import {
 import {
   openRecentProjectPath,
   parseProjectContent,
-} from "../src/project-file-helpers.js";
+} from "../src/storage/project-file-helpers.js";
 import { buildAppliedProjectState } from "../src/project-state-helpers.js";
 
 test("recent project open flow composes file parsing, state apply, history, and trace", async () => {
