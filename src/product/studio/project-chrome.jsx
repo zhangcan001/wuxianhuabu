@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { detectSaveStateTone, diffNewlyDoneSteps, providerLabel } from "./project-chrome-helpers.js";
 
 const productionViews = [
   ["overview", "总览"],
@@ -43,12 +44,7 @@ export function ProjectTopbar({
   const hasWorkspaces = Array.isArray(workspaces) && workspaces.length > 0;
   const imageQueue = queueCounts?.image || 0;
   const videoQueue = queueCounts?.video || 0;
-  const saveStatus = (() => {
-    if (!autoSaveState) return null;
-    if (autoSaveState.startsWith("已自动保存")) return { tone: "ok", icon: "✓", text: autoSaveState };
-    if (autoSaveState.startsWith("自动保存失败")) return { tone: "err", icon: "!", text: autoSaveState };
-    return { tone: "pending", icon: "…", text: autoSaveState };
-  })();
+  const saveStatus = detectSaveStateTone(autoSaveState);
   return (
     <header className="product-topbar">
       <div className="product-brand">
@@ -140,11 +136,7 @@ export function ProjectWorkflowStepper({ activeView = "overview", progress = {},
   const previousProgress = useRef({});
   const [justCompleted, setJustCompleted] = useState({});
   useEffect(() => {
-    const prev = previousProgress.current;
-    const newlyDone = {};
-    workflowSteps.forEach((step) => {
-      if (progress[step.key] && !prev[step.key]) newlyDone[step.key] = true;
-    });
+    const newlyDone = diffNewlyDoneSteps(previousProgress.current, progress, workflowSteps);
     previousProgress.current = { ...progress };
     if (Object.keys(newlyDone).length === 0) return;
     setJustCompleted((current) => ({ ...current, ...newlyDone }));
@@ -366,14 +358,3 @@ export function ProjectInspector({
   );
 }
 
-function providerLabel(key = "") {
-  const labels = {
-    text: "文本",
-    image: "图片",
-    video: "视频",
-    comfy: "ComfyUI",
-    gemini: "Gemini",
-    customImage: "自定义图片",
-  };
-  return labels[key] || key;
-}
