@@ -1,0 +1,457 @@
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.board-app {
+  position: fixed;
+  inset: 0;
+}
+
+.board-toolbar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(20, 22, 26, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.board-toolbar-insert {
+  top: 16px;
+}
+
+.board-toolbar-selection {
+  top: 72px;
+}
+
+.board-toolbar-btn {
+  appearance: none;
+  border: 0;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f6f8;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s ease;
+}
+
+.board-toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.board-toolbar-btn:active {
+  transform: scale(0.96);
+}
+
+.board-toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.board-toolbar-tag {
+  font-size: 14px;
+  padding: 0 4px;
+}
+
+.board-toolbar-sep {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 2px;
+}
+
+.settings-backdrop,
+.palette-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 10, 14, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 12vh;
+}
+
+.settings-modal {
+  width: min(540px, 92vw);
+  max-height: 76vh;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  color: #0f172a;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+}
+
+.settings-head,
+.settings-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.settings-foot {
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 0;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.settings-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.settings-body {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 14px;
+}
+
+.settings-group-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.settings-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.settings-field span {
+  width: 76px;
+  flex-shrink: 0;
+  color: #64748b;
+}
+
+.settings-field input {
+  flex: 1;
+  appearance: none;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  outline: none;
+  color: #0f172a;
+  font-family: inherit;
+}
+
+.settings-field input:focus {
+  border-color: #60a5fa;
+}
+
+.settings-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  padding: 0 4px;
+}
+
+.settings-btn {
+  appearance: none;
+  border: 0;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s ease;
+}
+
+.settings-btn:active {
+  transform: scale(0.96);
+}
+
+.settings-btn-primary {
+  background: #2563eb;
+  color: white;
+}
+
+.settings-btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.settings-btn-ghost {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.settings-btn-ghost:hover {
+  background: #e2e8f0;
+}
+
+.palette-modal {
+  width: min(520px, 92vw);
+  background: white;
+  color: #0f172a;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+}
+
+.palette-input {
+  width: 100%;
+  appearance: none;
+  border: 0;
+  outline: none;
+  font-size: 15px;
+  padding: 16px 18px;
+  background: white;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.palette-list {
+  max-height: 50vh;
+  overflow: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.palette-empty {
+  padding: 16px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #0f172a;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  font-family: inherit;
+}
+
+.palette-item.is-active {
+  background: #eff6ff;
+}
+
+.palette-item-hint {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.ai-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  color: #1f2937;
+  overflow: hidden;
+}
+
+.ai-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ai-card-tag {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef2f7;
+}
+
+.ai-card-title {
+  flex: 1;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+.ai-card-title:focus {
+  background: #f1f5f9;
+}
+
+.ai-card-btn {
+  appearance: none;
+  border: 0;
+  background: #2563eb;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s ease;
+}
+
+.ai-card-btn:hover {
+  background: #1d4ed8;
+}
+
+.ai-card-btn:active {
+  transform: scale(0.96);
+}
+
+.ai-card-btn:disabled {
+  background: #94a3b8;
+  cursor: progress;
+}
+
+.ai-card-btn-ghost {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.ai-card-btn-ghost:hover {
+  background: #e2e8f0;
+}
+
+.ai-card-input {
+  appearance: none;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  border-radius: 10px;
+  resize: none;
+  outline: none;
+  min-height: 64px;
+  font-family: inherit;
+}
+
+.ai-card-input:focus {
+  border-color: #60a5fa;
+  background: white;
+}
+
+.ai-card-input-line {
+  min-height: 0;
+}
+
+.ai-card-input-grow {
+  flex: 1;
+}
+
+.ai-card-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #0f172a;
+  white-space: pre-wrap;
+}
+
+.ai-card-body.is-error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.ai-card-image-body,
+.ai-card-video-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ai-card-image-body img,
+.ai-card-video-body video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.ai-card-image-body.is-error,
+.ai-card-video-body.is-error {
+  background: #fef2f2;
+}
+
+.ai-card-error {
+  color: #b91c1c;
+  font-size: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.ai-card-hint {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.ai-card-foot {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+}
